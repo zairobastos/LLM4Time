@@ -4,7 +4,8 @@ A série temporal tem dados de {periodos} peiodo(s) consecutivos. Cada anotaçã
 
 Início da Previsão:
 Sua previsão deve começar a partir do próximo período (meia-noite do próximo dia), seguindo o padrão observado nos dados anteriores.
-Para este exemplo, um início de previsão esperado pode ser {inicio_previsao}.
+Para este exemplo, um início de previsão esperado pode ser
+{inicio_previsao}
 Garanta que o primeiro valor da previsão corresponda ao início do período, respeitando os padrões observados.
 
 Objetivo:
@@ -52,12 +53,16 @@ Série temporal a ser analisada:
 Exemplos de um Período N={n}:
 
 Exemplo 1:
-Período (histórico): {periodo1}  
-Período (prevista):  {periodo2} 
+Período (histórico):
+{periodo1}
+Período (prevista):
+{periodo2}
 
 Exemplo 2:
-Período (histórico): {periodo3}   
-Período (prevista):  {periodo4}
+Período (histórico):
+{periodo3}
+Período (prevista):
+{periodo4}
 
 =======================
 
