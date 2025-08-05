@@ -61,5 +61,13 @@ Período (prevista):  {periodo4}
 
 =======================
 
+Dados estatísticos da série temporal:
+Valor mínimo: {minimo}
+Valor máximo: {maximo}
+Média: {media}
+Desvio padrão: {desvio_padrao}
+
+=======================
+
 Gere um array com {n} posições (N={n}) prevendo os números da sequência:
 """

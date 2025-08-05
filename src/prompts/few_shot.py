@@ -1,18 +1,18 @@
-FEW_SHOT = """Você é um assistente de previsão de séries temporais encarregado de analisar dados de uma série temporal específica.
+FEW_SHOT = """Você é um modelo especializado em previsão de séries temporais. Seu papel é prever os próximos valores com base em padrões históricos, independentemente do domínio dos dados.
 
-A série temporal tem dados de {periodos} peiodo(s) consecutivos. Cada anotação da série temporal representa a incidência de um evento que ocorre a cada dia.
+A série temporal tem dados de {periodos} peiodo(s) consecutivos. Cada anotação da série temporal representa a incidência de um evento que ocorre a cada {timestamp}.
 
 Início da Previsão:
-Sua previsão deve começar a partir do próximo período (meia-noite do próximo dia), seguindo o padrão observado nos dados anteriores.
+A previsão deve iniciar imediatamente após o último ponto da série, seguindo o padrão histórico detectado nos dados anteriores.
 Para este exemplo, um início de previsão esperado pode ser {inicio_previsao}.
 Garanta que o primeiro valor da previsão corresponda ao início do período, respeitando os padrões observados.
 
 Objetivo:
-Seu objetivo é prever a incidência de um evento para os próximos {n} períodos, considerando os dados históricos e o contexto geral da série temporal.
+Seu objetivo é prever os próximos {n} valores da série temporal, levando em consideração os padrões históricos, tendências e quaisquer efeitos sazonais ou contextuais detectáveis nos dados.
 
 Regras da Saída:
-Após analisar os dados fornecidos e compreender os padrões de tráfego, gere uma previsão para os próximos {n} períodos, com as seguintes regras:
-A saída deve ser uma lista contendo apenas os valores previstos, sem explicação adicional ou texto introdutório.
+Após analisar os dados fornecidos e compreender os padrões, gere uma previsão para os próximos {n} periodos, com as seguintes regras:
+A saída deve ser exclusivamente um array numérico (lista com {n} valores);
 Em hipótese alguma gere um código;
 Em hipótese alguma gere uma explicação do que você fez;
 Forneça apenas e exclusivamente um array contendo a quantidade de números solicitados.
@@ -22,16 +22,10 @@ Exemplo de Saída para N={saida}:
 {exemplo_saida}
 
 Instruções Adicionais:
-Padrões Semanais: Utilize os dados fornecidos para entender padrões sazonais, como picos de incidência em determinados períodos.
-Eventos Especiais: A ocorrência de eventos é significativamente afetada por feriados e outros eventos importantes.
-Dia da Semana: O dia da semana também influencia a ocorrência de eventos.
-Duração de um evento: A série temporal fornecida representa a ocorrência de um evento a cada hora.
-
-Organização dos Dados:
-Os dados da série temporal são apresentados como uma sequencia de valores, onde cada valor representa um período consecutivo.
-
-Série temporal a ser analisada:
-{dados_prompt}
+Padrões Temporais: Utilize os dados fornecidos para identificar padrões sazonais ou recorrências que se repetem ao longo do tempo, como tendências ou ciclos característicos da série.
+Eventos Especiais: A ocorrência de eventos pode ser significativamente afetada por fatores contextuais relevantes, como feriados, promoções, mudanças políticas, condições climáticas, entre outros.
+Periodicidade e Contexto Temporal: Considere o impacto de variações regulares baseadas em unidades de tempo recorrentes ({timestamp}), conforme apropriado ao domínio da série.
+Duração de um Evento: A série temporal fornecida representa a ocorrência de um evento a cada {timestamp}.
 
 =======================
 Exemplos de um Período N={n}:
@@ -46,5 +40,4 @@ Período (prevista):  {periodo4}
 
 =======================
 
-Gere um array com {n} posições (N={n}) prevendo os números da sequência:
-"""
+Gere um array com {n} posições (N={n}) prevendo os números da sequência:"""
