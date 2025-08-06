@@ -44,7 +44,7 @@ def configuracao_dataset(dataset, uploaded_file):
 		elif tratamento == "Manter o último":
 			df = df.drop_duplicates(subset="date", keep="last")
 		elif tratamento == "Somar valores duplicados":
-			df = df.groupby("date", as_index=False)['value'].transform('sum')
+			df = df.groupby("date", as_index=False)['value'].sum()
 
 		# Salvar
 		file_path = f"data/{uploaded_file.name}"
