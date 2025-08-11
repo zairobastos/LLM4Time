@@ -27,5 +27,8 @@ Eventos Especiais: A ocorrência de eventos pode ser significativamente afetada 
 Periodicidade e Contexto Temporal: Considere o impacto de variações regulares baseadas em unidades de tempo recorrentes ({timestamp}), conforme apropriado ao domínio da série.
 Duração de um Evento: A série temporal fornecida representa a ocorrência de um evento a cada {timestamp}.
 
-Gere um array com {n} posições (N={n}) prevendo os números da sequência:
+Série temporal a ser analisada:
+{dados_prompt}
+
+Gere um array com {n} observações (N={n}) prevendo os números da sequência:
 """
