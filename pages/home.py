@@ -29,12 +29,12 @@ with st.sidebar:
   temperature = st.slider(label='Temperatura', min_value=0.0, max_value=1.0, value=0.7, step=0.1, help='A temperatura controla a aleatoriedade da resposta do modelo. Valores mais altos resultam em respostas mais criativas e variados.')
 
   st.write('---')
-  datasets = os.listdir('data')
+  datasets = os.listdir('uploads')
   dataset = st.selectbox('Base de Dados', datasets)
 
   if dataset:
     st.write(f"#### ⚙️ Configurações do Prompt")
-    df = pd.read_csv(f'data/{dataset}')
+    df = pd.read_csv(f'uploads/{dataset}')
     min_date = pd.to_datetime(df['date']).min().date()
     max_date = pd.to_datetime(df['date']).max().date()
 
@@ -54,7 +54,7 @@ with st.sidebar:
 
 if not confirm:
   st.write('## LLM4Time Pipeline')
-  st.write('Siga as etapas de pré-processamento dos dados e configuração do modelo no pipeline abaixo para gerar previsões.\n\n')
+  st.write('Siga as etapas de pré-processamento dos dados e configuração do modelo no pipeline abaixo para gerar previsões.\n')
   st.image("icons/llm4time.svg", width=750)
 
 # ---------------- Validações ----------------
@@ -68,13 +68,19 @@ elif not dataset:
 # ---------------- Resultado ----------------
 
 else:
-  Header(model=model, dataset=dataset, start_date=str(start_date), end_date=str(end_date), periods=periods, prompt_type=prompt_type.name, ts_format=ts_format.name, ts_type=ts_type.name).header()
+  Header.home(model=model, dataset=dataset, start_date=str(start_date), end_date=str(end_date), periods=periods, prompt_type=prompt_type.name, ts_format=ts_format.name, ts_type=ts_type.name)
   Dataset(dataset=dataset, start_date=str(start_date), end_date=str(end_date), periods=periods).show()
-  prompt, y_true = Prompt(dataset=dataset, start_date=str(start_date), end_date=str(end_date), periods=periods, prompt_type=prompt_type, ts_format=ts_format, ts_type=ts_type).view()
-  y_pred, total_tokens_prompt, total_tokens_response, response_time = API.mock(periods=periods, ts_format=ts_format, ts_type=ts_type)
-  #y_pred, total_tokens_prompt, total_tokens_response, response_time = API(model=model, provider=provider, prompt=prompt, temperature=temperature).response()
+  window, y_true, prompt = Prompt(dataset=dataset, start_date=str(start_date), end_date=str(end_date), periods=periods, prompt_type=prompt_type, ts_format=ts_format, ts_type=ts_type).view()
+  api = API(model=model, provider=provider, temperature=temperature)
 
-  y_pred = parse_timeseries(y_pred, ts_format, ts_type) # Converte a resposta para uma lista
+  # Calcula o número máximo de tokens na resposta
+  #max_tokens = api.max_tokens(window=window, ts_format=ts_format, ts_type=ts_type, steps=periods)
+  #print(f"[INFO] Tokens Máximo: {max_tokens}")
+
+  #y_pred, total_tokens_prompt, total_tokens_response, response_time = api.response(content=prompt)
+  y_pred, total_tokens_prompt, total_tokens_response, response_time = API.mock(periods=periods, ts_format=ts_format, ts_type=ts_type)
+
+  y_pred = parse_timeseries(y_pred, ts_format, ts_type)
   smape, mae, rmse = Results(y_true=y_true, y_pred=y_pred, total_tokens_prompt=total_tokens_prompt, total_tokens_response=total_tokens_response, response_time=response_time).show()
 
   inserted = CrudHistory().insert(

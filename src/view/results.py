@@ -15,7 +15,7 @@ class Results:
       y_pred (list): Valores previstos.
       total_tokens_prompt (int): Quantidade de tokens do prompt.
       total_tokens_response (int): Quantidade de tokens da resposta.
-      response_time (float): response_time de execução.
+      response_time (float): Tempo de resposta.
     """
     self.y_true = y_true
     self.y_pred = y_pred
@@ -24,7 +24,9 @@ class Results:
     self.response_time = response_time
 
   def show(self):
-    metrics = Metrics(y_pred=self.y_pred, y_true=self.y_true)
+    st.write('---')
+    st.write('### Resultados')
+    m = Metrics(y_pred=self.y_pred, y_true=self.y_true)
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -36,27 +38,31 @@ class Results:
 
     col4, col5, col6 = st.columns(3)
     with col4:
-      smape = metrics.smape()
+      smape = m.smape()
       st.metric(label='sMAPE', value=smape, help="Erro percentual absoluto médio simétrico (sMAPE).")
     with col5:
-      mae = metrics.mae()
+      mae = m.mae()
       st.metric(label='MAE', value=mae, help="Erro médio absoluto (MAE).")
     with col6:
-      rmse = metrics.rmse()
+      rmse = m.rmse()
       st.metric(label='RMSE', value=rmse, help="Erro quadrático médio (RMSE).")
 
-    st.write('---')
-    st.write('### Resultados')
     st.write("Valores Exatos")
     st.code(self.y_true, language='python', line_numbers=True)
 
     st.write("Valores Previstos")
     st.code(self.y_pred, language='python', line_numbers=True)
 
-    st.write('### Gráfico Série Temporal - Previsão')
+    Graph.forecast_statistics(
+      title="Comparação Estatística",
+      y_true=self.y_true,
+      y_pred=self.y_pred
+    )
+
     Graph.forecast(
       title=f'Série Temporal - Previsão / SMAPE = {smape}',
       y_true=self.y_true,
       y_pred=self.y_pred
     )
+
     return smape, mae, rmse

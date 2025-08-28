@@ -3,9 +3,10 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 from scipy.stats import sem
 
 class Metrics:
-  def __init__(self, y_true, y_pred):
-    self.y_true = y_true
-    self.y_pred = y_pred
+  def __init__(self, y_true: list, y_pred: list):
+    mask = ~np.isnan(y_true) & ~np.isnan(y_pred)
+    self.y_true = np.array(y_true)[mask]
+    self.y_pred = np.array(y_pred)[mask]
 
   def smape(self) -> float:
     """Calcula o erro percentual absoluto médio simétrico (sMAPE).

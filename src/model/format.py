@@ -1,5 +1,6 @@
 import json
 import re
+import numpy as np
 import pandas as pd
 from io import StringIO
 from enum import Enum
@@ -120,14 +121,29 @@ PARSERS = {
   TSFormat.CSV: parse_csv
 }
 
+# ---------------------- NORMALIZADORES ----------------------
+
+def normalize_missing(v):
+  if v is None or (isinstance(v, float) and np.isnan(v)):
+    return "nan"
+  return v
+
+def denormalize_missing(v):
+  if str(v).lower() == "nan":
+    return np.nan
+  return v
+
 # ---------------------- CODIFICADORES ----------------------
+
 def encode_numeric(data: list) -> list:
-  return data
+  if data and isinstance(data[0], (tuple, list)):
+    return [(d, normalize_missing(v)) for d, v in data]
+  return [normalize_missing(v) for v in data]
 
 def encode_textual(data: list) -> list:
   if data and isinstance(data[0], (tuple, list)):
-    return [(d, ' '.join(str(v))) for d, v in data]
-  return [' '.join(str(v)) for v in data]
+    return [(d, ' '.join(str(normalize_missing(v)))) for d, v in data]
+  return [' '.join(str(normalize_missing(v))) for v in data]
 
 ENCODERS = {
   TSType.NUMERIC: encode_numeric,
@@ -137,13 +153,17 @@ ENCODERS = {
 # ---------------------- DECODIFICADORES ----------------------
 def decode_numeric(data: list) -> list:
   if data and isinstance(data[0], (tuple, list)):
-    data = [v for _, v in data]
-  return [float(v) for v in data]
+    data = [denormalize_missing(v) for _, v in data]
+  else:
+    data = [denormalize_missing(v) for v in data]
+  return [float(v) if not pd.isna(v) else np.nan for v in data]
 
 def decode_textual(data: list) -> list:
   if data and isinstance(data[0], (tuple, list)):
-    data = [v for _, v in data]
-  return [float(str(v).replace(' ', '')) for v in data]
+    data = [denormalize_missing(v) for _, v in data]
+  else:
+    data = [denormalize_missing(v) for v in data]
+  return [float(str(v).replace(' ', '')) if not pd.isna(v) else np.nan for v in data]
 
 DECODERS = {
   TSType.NUMERIC: decode_numeric,
@@ -151,7 +171,7 @@ DECODERS = {
 }
 
 # ---------------------- FUNÇÕES PÚBLICAS ----------------------
-def format_timeseries(data: list, ts_format: TSFormat, ts_type: TSType = TSType.NUMERIC) -> str:
+def format_timeseries(ts: list, ts_format: TSFormat, ts_type: TSType = TSType.NUMERIC) -> str:
   """
   Formata uma lista de tuplas (data, valor) para uma string no formato especificado.
   """
@@ -159,9 +179,9 @@ def format_timeseries(data: list, ts_format: TSFormat, ts_type: TSType = TSType.
     raise ValueError(f"Formato desconhecido: {format}")
   if ts_type not in ENCODERS:
     raise ValueError(f"Tipo desconhecido: {ts_type}")
-  return FORMATTERS[ts_format](ENCODERS[ts_type](data))
+  return FORMATTERS[ts_format](ENCODERS[ts_type](ts))
 
-def parse_timeseries(data: str, ts_format: TSFormat, ts_type: TSType = TSType.NUMERIC) -> list:
+def parse_timeseries(ts: str, ts_format: TSFormat, ts_type: TSType = TSType.NUMERIC) -> list:
   """
   Converte uma string formatada de volta para uma lista de tuplas (data, valor).
   """
@@ -170,6 +190,6 @@ def parse_timeseries(data: str, ts_format: TSFormat, ts_type: TSType = TSType.NU
   if ts_type not in DECODERS:
     raise ValueError(f"Tipo desconhecido: {ts_type}")
   try:
-    return DECODERS[ts_type](PARSERS[ts_format](data))
+    return DECODERS[ts_type](PARSERS[ts_format](ts))
   except:
-    return DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](data))
+    return DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](ts))

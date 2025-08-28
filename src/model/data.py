@@ -17,17 +17,18 @@ class Data:
     self.start_date = start_date
     self.end_date = end_date
     self.periods = periods
-    dir = Path(__file__).resolve().parent
-    self.path =  dir.parent.parent / 'data' / self.dataset
 
   @staticmethod
-  def read_csv(path: str) -> pd.DataFrame:
+  def read_csv(dataset: str) -> pd.DataFrame:
     """Lê um arquivo CSV do caminho especificado e retorna um DataFrame."""
+    dir = Path(__file__).resolve().parent
+    path =  dir.parent.parent / 'uploads' / dataset
+
     try:
       print(f"[INFO] Lendo dados do caminho: {path}")
-      dataset = pd.read_csv(path)
+      df = pd.read_csv(path)
       print(f"[INFO] Dados carregados com sucesso do arquivo: {path}")
-      return dataset
+      return df
     except FileNotFoundError as e:
       print(f"[ERROR] Arquivo não encontrado: {e}")
       return None
@@ -38,15 +39,15 @@ class Data:
   def period_selection(self) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Seleciona os dados entre as datas de início e fim e os dados futuros a prever."""
     try:
-      dataset = Data.read_csv(self.path)
+      dataset = Data.read_csv(self.dataset)
       if dataset is None or dataset.empty:
         raise ValueError("O dataset está vazio ou não foi carregado corretamente.")
       if self.start_date > self.end_date:
         raise ValueError("A data de início não pode ser maior que a data de fim.")
 
-      df = dataset.query("date >= @self.start_date and date <= @self.end_date")
+      df_window = dataset.query("date >= @self.start_date and date <= @self.end_date")
       df_true = dataset.query("date > @self.end_date")
-      return df, df_true[:self.periods]
+      return df_window, df_true[:self.periods]
     except ValueError as e:
       print(f"[ERROR] {e}")
       return None, None
@@ -57,14 +58,14 @@ class Data:
   def prompt(self) -> tuple[list[float], list[float]]:
     """Retorna os dados do período selecionado e os valores exatos a prever como listas."""
     try:
-      dataset, df_true = self.period_selection()
-      if dataset is None or df_true is None:
+      df_window, df_true = self.period_selection()
+      if df_window is None or df_true is None:
         raise ValueError("Os dados não foram carregados corretamente.")
-      if dataset.empty or df_true.empty:
+      if df_window.empty or df_true.empty:
         raise ValueError("Os dados estão vazios.")
 
       print(f"[INFO] Dados entre {self.start_date} e {self.end_date} carregados com sucesso.")
-      window = list(zip(dataset['date'].astype(str), dataset['value'].round(3)))
+      window = list(zip(df_window['date'].astype(str), df_window['value'].round(3)))
       y_true = df_true['value'].round(3).tolist()
       return window, y_true
     except ValueError as e:

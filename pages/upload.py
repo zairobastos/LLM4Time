@@ -27,8 +27,8 @@ def upload():
 def rename_file(old_name, new_name):
   """Função para renomear arquivo."""
   try:
-    original_path = os.path.join("data", old_name)
-    new_path = os.path.join("data", new_name)
+    original_path = os.path.join("uploads", old_name)
+    new_path = os.path.join("uploads", new_name)
 
     # Valida nome do arquivo
     if not new_name.strip():
@@ -115,7 +115,7 @@ def configuration_dialog(dataset: str, uploaded_file: str):
   # --- ETAPA 3: Nome do arquivo CSV ---
   if st.session_state.step == 3:
     st.session_state.csv_name = st.text_input("Nome para salvar o CSV", value=os.path.splitext(uploaded_file.name)[0], key="csv_name_key").strip()
-    if os.path.isfile(f"data/{st.session_state.csv_name}.csv"):
+    if os.path.isfile(f"uploads/{st.session_state.csv_name}.csv"):
       st.warning(f"Arquivo '{st.session_state.csv_name}.csv' já existe.")
 
   # -- BOTÕES --
@@ -198,7 +198,7 @@ def configuration_dialog(dataset: str, uploaded_file: str):
       st.button("Voltar", on_click=prev_step, use_container_width=True)
   with col2:
     if st.session_state.step == 3:
-      csv_path = f"data/{st.session_state.csv_name}.csv"
+      csv_path = f"uploads/{st.session_state.csv_name}.csv"
       if st.button("Confirmar", use_container_width=True, type="primary", disabled=os.path.isfile(csv_path)):
         df = configure_dataset()
         df.to_csv(csv_path, index=False)
@@ -231,7 +231,7 @@ def confirmation_dialog(datasets: list):
     if st.button("Excluir", use_container_width=True, type="primary"):
       for dataset in datasets:
         try:
-          os.remove(f"data/{dataset}")
+          os.remove(f"uploads/{dataset}")
         except FileNotFoundError:
           st.toast(f"Arquivo '{dataset}' não encontrado.", icon="⚠️")
         except Exception as e:
@@ -247,12 +247,12 @@ uploaded_file = st.file_uploader("Escolha um arquivo", on_change=upload, key="up
 
 # ---------------- Datasets disponíveis ----------------
 
-datasets = os.listdir("data") if os.path.exists("data") else []
+datasets = os.listdir("uploads") if os.path.exists("uploads") else []
 
 if datasets:
   info = []
   for dataset in datasets:
-    file_path = os.path.join("data", dataset)
+    file_path = os.path.join("uploads", dataset)
 
     if os.path.exists(file_path):
       file_size = os.path.getsize(file_path)

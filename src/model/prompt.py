@@ -33,7 +33,8 @@ class PromptModel:
       raise ValueError("periods deve ser um inteiro positivo.")
 
     self.window = window
-    self.periods = periods
+    self.num_periods_window = len(self.window)
+    self.num_periods_forecast = periods
     self.prompt_type = prompt_type
     self.ts_format = ts_format
     self.ts_type = ts_type
@@ -53,23 +54,23 @@ class PromptModel:
     window = format_timeseries(self.window, self.ts_format, self.ts_type)
 
     base_kwargs = {
-      "periods": len(self.window),
       "start_forecast": start_forecast,
-      "output": self.periods,
+      "num_periods_window": self.num_periods_window,
+      "num_periods_forecast": self.num_periods_forecast,
+      "num_periods_example": self.num_periods_forecast,
       "output_example": output_example,
-      "data_prompt": window,
+      "input": window,
       "timestamp": "hora",
-      "n": self.periods,
     }
 
     if self.prompt_type == PromptType.ZERO_SHOT:
-      print(f"[INFO] Prompt ZERO-SHOT gerado com {len(self.window)} períodos.")
+      print(f"[INFO] Prompt ZERO-SHOT gerado com {self.num_periods_window} períodos.")
       return ZERO_SHOT.format(**base_kwargs)
 
     elif self.prompt_type == PromptType.FEW_SHOT or self.prompt_type == PromptType.COT_FEW:
-      print(f"[INFO] Prompt FEW-SHOT ou COT-FEW gerado com {len(self.window)} períodos.")
+      print(f"[INFO] Prompt FEW-SHOT ou COT-FEW gerado com {self.num_periods_window} períodos.")
       # Verificação se há dados suficientes
-      if len(self.window) < 96:
+      if self.num_periods_window < 96:
         raise ValueError("Para FEW-SHOT ou COT-FEW, window deve conter pelo menos 96 elementos.")
 
       period1 = format_timeseries(self.window[:24], self.ts_format, self.ts_type)
@@ -91,7 +92,7 @@ class PromptModel:
         return COT_FEW.format(**base_kwargs)
 
     elif self.prompt_type == PromptType.COT:
-      print(f"[INFO] Prompt COT gerado com {len(self.window)} períodos.")
+      print(f"[INFO] Prompt COT gerado com {self.num_periods_window} períodos.")
       return COT.format(**base_kwargs)
 
     else:

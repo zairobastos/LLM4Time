@@ -1,17 +1,28 @@
 import streamlit as st
+from src.view.header import Header
+from src.view.graph import Graph
+import pandas as pd
 import os
 
-from src.view.statistics import Statistics
 
 with st.sidebar:
-  datasets = os.listdir('data')
+  datasets = os.listdir('uploads')
   dataset = st.selectbox('Database', datasets)
-  confirm = st.button(label='Gerar Estatísticas', key='generate_statistics', type='primary', use_container_width=True)
+
+  confirm = st.button(
+    label='Gerar Estatísticas',
+    key='generate_statistics',
+    type='primary',
+    use_container_width=True
+  )
 
 if confirm:
-  statistics = Statistics(dataset=dataset)
+  df = pd.read_csv(f"uploads/{dataset}")
+
   st.write("### Descrição")
-  statistics.describe()
+  Header.statistics(dataset=dataset, df=df)
+
   st.write("### Base de Dados")
-  statistics.dataframe()
-  statistics.show()
+  st.dataframe(df, use_container_width=True)
+
+  Graph.time_series(title="Valores ao Longo do Tempo", df=df)

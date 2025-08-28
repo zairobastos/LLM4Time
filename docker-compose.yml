@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  app:
+    image: llm4time
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: llm4time
+    ports:
+      - 8080:8080
+    volumes:
+      - ./database:/app/database/
+      - ./uploads:/app/uploads/
+    restart: unless-stopped

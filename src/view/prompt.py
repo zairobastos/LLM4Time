@@ -36,12 +36,12 @@ class Prompt:
     prompt = PromptModel(window=window, periods=self.periods, prompt_type=self.prompt_type, ts_format=self.ts_format, ts_type=self.ts_type).generate()
 
     st.write('---')
-    st.write('### Prompt')
+    st.write(f'#### Prompt - {self.prompt_type.name}')
     st.code(prompt, language='python', line_numbers=True)
 
-    st.write('### Gráfico Série Temporal - Prompt')
-    Graph.sample(
+    Graph.period_series(
       title="Série Temporal - Prompt",
       values=[v for _, v in window]
     )
-    return prompt, y_true
+
+    return window, y_true, prompt

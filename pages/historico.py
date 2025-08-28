@@ -28,7 +28,7 @@ def confirmation_dialog(dataset: str, prompts: list):
 with st.sidebar:
   st.write(" ### 🔍 Parâmetros da Busca")
 
-  datasets = os.listdir('data')
+  datasets = os.listdir('uploads')
   dataset = st.selectbox('Base de Dados', datasets)
 
   prompts = st.multiselect(label='Tipo de Prompt',
