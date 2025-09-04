@@ -1,0 +1,34 @@
+[[pages]]
+path = "pages/home.py"
+name = "Previsões"
+icon = "📊"
+
+[[pages]]
+path = "pages/upload.py"
+name = "Upload"
+icon = "📤"
+url_path = "upload"
+
+[[pages]]
+path = "pages/statistics.py"
+name = "Estatísticas"
+icon = "🎯"
+url_path = "statistics"
+
+[[pages]]
+path = "pages/settings.py"
+name = "Configurações"
+icon = "⚙️"
+url_path = "settings"
+
+[[pages]]
+path = "pages/history.py"
+name = "Histórico"
+icon = "🗂️"
+url_path = "history"
+
+[[pages]]
+path = "pages/benchmark.py"
+name = "Benchmark"
+icon = "🥇"
+url_path = "benchmark"

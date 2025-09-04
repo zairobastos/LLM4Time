@@ -1,0 +1,13 @@
+services:
+  app:
+    image: llm4time
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: llm4time
+    ports:
+      - 8501:8501
+    volumes:
+      - ./app/database:/app/database:rw
+      - ./app/uploads:/app/uploads:rw
+    restart: unless-stopped

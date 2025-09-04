@@ -1,0 +1,12 @@
+lmstudio==1.3.0
+numpy==2.2.5
+openai==1.86.0
+pandas==2.2.3
+permetrics==2.0.0
+plotly==6.1.0
+python-dotenv==1.1.0
+scikit-learn==1.7.1
+scipy==1.15.3
+setuptools==80.9.0
+statsmodels==0.14.5
+tiktoken==0.11.0

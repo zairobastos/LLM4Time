@@ -1,0 +1,18 @@
+# Virtual environments
+venv/
+
+# Build and packaging
+dist/
+**/build/
+*.egg-info/
+*.pypirc
+
+# Environment variables
+*.env
+
+# Caches
+**/__pycache__/
+
+# Application
+**/uploads/
+**/database/

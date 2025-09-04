@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Version control
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Others
+.DS_Store
+*.log
