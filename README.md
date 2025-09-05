@@ -1,8 +1,7 @@
 <div align="center">
 
 # 📊  LLM4Time
-
-Uma biblioteca para previsão de séries temporais com modelos de linguagem.
+Uma biblioteca para previsão de séries temporais com modelos de linguagem
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1TcQ9RPNrtPHSq5gaMXfBTEV7uEpMA66w?usp=sharing)
 [![PyPI version](https://img.shields.io/pypi/v/llm4time.svg)](https://pypi.org/project/llm4time/)
@@ -14,7 +13,7 @@ Uma biblioteca para previsão de séries temporais com modelos de linguagem.
 <p align="center">
   <a href="#-get-started">Get Started</a> •
   <a href="https://zairobastos.github.io/LLM4Time/">Documentação</a> •
-  <a href="#-referencias">Referências</a> •
+  <a href="#-referências">Referências</a> •
   <a href="#-contato">Contato</a>
 </p>
 
@@ -129,13 +128,13 @@ content = prompt.generate(
 ### Previsão com LLMs
 #### 6. Instanciando um modelo OpenAI
 ```python
-  from llm4time.core.models import OpenAI
+from llm4time.core.models import OpenAI
 
-  model = OpenAI(
-    model='gpt-4o',  # Nome do modelo OpenAI a ser utilizado.
-    api_key='...',   # Chave de API para autenticação no serviço OpenAI.
-    base_url='..'    # URL base do endpoint OpenAI.
-  )
+model = OpenAI(
+  model='gpt-4o',  # Nome do modelo OpenAI a ser utilizado.
+  api_key='...',   # Chave de API para autenticação no serviço OpenAI.
+  base_url='..'    # URL base do endpoint OpenAI.
+)
 ```
 
 #### 7. Gerando uma previsão
@@ -192,23 +191,77 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
 ---
 
 ## 🔍 Referências
-
 ```latex
 @article{zairo2025prompt,
   title={Prompt-Driven Time Series Forecasting with Large Language Models},
   author={Zairo Bastos and João David Freitas and José Wellington Franco and Carlos Caminha},
   journal={Proceedings of the 27th International Conference on Enterprise Information Systems - Volume 1: ICEIS},
-  year ={2025},
+  year={2025}
 }
 ```
 
-## 📄 Licença
+## 👥 Equipe
+<div align="center">
+<table>
+  <tr>
+    <td align="center" nowrap>
+      <a href="https://github.com/zairobastos"><img src="https://github.com/zairobastos.png" style="width: 80px; height: 80px;" alt="Zairo Bastos"/></a>
+      <br />
+      <sub><b>Zairo Bastos</b></sub>
+      <br />
+      <sub><i>Mestrando - UFC</i></sub>
+      <br />
+      <a href="mailto:zairobastos@gmail.com" title="Email">📧</a>
+      <a href="https://www.linkedin.com/in/zairobastos/" title="LinkedIn">🔗</a>
+    </td>
+    <td align="center" nowrap>
+      <a href="https://github.com/wesleey"><img src="https://github.com/wesleey.png" style="width: 80px; height: 80px;" alt="Wesley Barbosa"/></a>
+      <br />
+      <sub><b>Wesley Barbosa</b></sub>
+      <br />
+      <sub><i>Graduando - UFC</i></sub>
+      <br />
+      <a href="mailto:wesley.barbosa.developer@gmail.com" title="Email">📧</a>
+      <a href="https://www.linkedin.com/in/wesleybarbosasilva/" title="LinkedIn">🔗</a>
+    </td>
+    <td align="center" nowrap>
+      <a href="https://github.com/fernandascarcela"><img src="https://github.com/fernandascarcela.png" style="width: 80px; height: 80px;" alt="Fernanda Scarcela"/></a>
+      <br />
+      <sub><b>Fernanda Scarcela</b></sub>
+      <br />
+      <sub><i>Graduanda - UFC</i></sub>
+      <br />
+      <a href="mailto:fernandascla@alu.ufc.br" title="Email">📧</a>
+      <a href="https://www.linkedin.com/in/fernanda-scarcela-a95543220/" title="LinkedIn">🔗</a>
+    </td>
+    <td align="center" nowrap>
+      <a href="https://lattes.cnpq.br/4380023778677961"><img src="https://scholar.googleusercontent.com/citations?view_op=view_photo&user=dxEWdrAAAAAJ" style="width: 80px; height: 80px;" alt="Carlos Caminha"/></a>
+      <br />
+      <sub><b>Carlos Caminha</b></sub>
+      <br />
+      <sub><i>Professor Orientador - UFC</i></sub>
+      <br />
+      <a href="mailto:caminha@ufc.br" title="Email">📧</a>
+      <a href="https://lattes.cnpq.br/4380023778677961" title="Lattes">🔗</a>
+    </td>
+    <td align="center" nowrap>
+      <a href="https://lattes.cnpq.br/5168415467086883"><img src="https://scholar.googleusercontent.com/citations?view_op=view_photo&user=3ivVWKkAAAAJ" style="width: 80px; height: 80px;" alt="José Wellington Franco"/></a>
+      <br />
+      <sub><b>José Wellington Franco</b></sub>
+      <br />
+      <sub><i>Professor Orientador - UFC</i></sub>
+      <br />
+      <a href="mailto:wellington@crateus.ufc.br" title="Email">📧</a>
+      <a href="https://lattes.cnpq.br/5168415467086883" title="Lattes">🔗</a>
+    </td>
+  </tr>
+</table>
+</div>
 
+## 📄 Licença
 Este projeto está licenciado sob a [MIT License](https://github.com/zairobastos/LLM4Time/blob/main/LICENSE).
 
 ## 📬 Contato
-
 Em caso de dúvidas, sugestões ou feedback:
-
-- 📧 E-mail: [zairobastos@gmail.com](mailto:zairobastos@gmail.com)
+- 📧 Email: [zairobastos@gmail.com](mailto:zairobastos@gmail.com)
 - 🔗 LinkedIn: [Zairo Bastos](https://www.linkedin.com/in/zairobastos/)
