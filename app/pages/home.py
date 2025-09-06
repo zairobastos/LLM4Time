@@ -14,8 +14,7 @@ from llm4time.core.formatting import TSFormat, TSType
 from llm4time.core.data import preprocessor
 from llm4time.core import prompt as pmpt
 from llm4time.core.formatter import parse
-from llm4time.core.evaluate.metrics import Metrics
-from llm4time.core.evaluate.statistics import Statistics
+from llm4time.core.metrics import evaluate
 
 
 with st.sidebar:
@@ -135,9 +134,7 @@ else:
 
     y_pred = parse(y_pred, ts_format=ts_format, ts_type=ts_type)
 
-    metrics = Metrics(y_val, y_pred)
-    stats_val = Statistics(y_val)
-    stats_pred = Statistics(y_pred)
+    metrics, stats_val, stats_pred = evaluate(y_val, y_pred)
 
     Home.results_section(
         y_val=y_val,
@@ -160,23 +157,23 @@ else:
         ts_type=ts_type,
         y_val=str(y_val),
         y_pred=str(y_pred),
-        smape=metrics.smape(),
-        mae=metrics.mae(),
-        rmse=metrics.rmse(),
+        smape=metrics.smape,
+        mae=metrics.mae,
+        rmse=metrics.rmse,
         total_tokens_prompt=total_tokens_prompt,
         total_tokens_response=total_tokens_response,
         total_tokens=total_tokens_prompt+total_tokens_response,
         response_time=response_time,
-        mean_val=stats_val.mean(),
-        mean_pred=stats_pred.mean(),
-        median_val=stats_val.median(),
-        median_pred=stats_pred.median(),
-        std_val=stats_val.std(),
-        std_pred=stats_pred.std(),
-        min_val=stats_val.min(),
-        min_pred=stats_pred.min(),
-        max_val=stats_val.max(),
-        max_pred=stats_pred.max()
+        mean_val=stats_val.mean,
+        mean_pred=stats_pred.mean,
+        median_val=stats_val.median,
+        median_pred=stats_pred.median,
+        std_val=stats_val.std,
+        std_pred=stats_pred.std,
+        min_val=stats_val.min,
+        min_pred=stats_pred.min,
+        max_val=stats_val.max,
+        max_pred=stats_pred.max
     )
 
     if inserted:

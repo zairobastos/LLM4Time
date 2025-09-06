@@ -169,20 +169,18 @@ class Home:
     with col2:
       st.metric(label='Tokens Resposta', value=total_tokens_response)
     with col3:
-      st.metric(label='Tempo de Execução',
-                value=f"{response_time:.2f} segundos")
+      st.metric(label='Tempo de Execução', value=f"{response_time:.2f} segundos")
 
     col4, col5, col6 = st.columns(3)
     with col4:
-      smape = metrics.smape()
-      st.metric(label='sMAPE', value=smape,
+      st.metric(label='sMAPE', value=metrics.smape,
                 help="Erro percentual absoluto médio simétrico (sMAPE).")
     with col5:
-      mae = metrics.mae()
-      st.metric(label='MAE', value=mae, help="Erro médio absoluto (MAE).")
+      st.metric(label='MAE', value=metrics.mae,
+                help="Erro médio absoluto (MAE).")
     with col6:
-      rmse = metrics.rmse()
-      st.metric(label='RMSE', value=rmse, help="Erro quadrático médio (RMSE).")
+      st.metric(label='RMSE', value=metrics.rmse,
+                help="Erro quadrático médio (RMSE).")
 
     st.write("Valores Exatos")
     st.code(y_val, language='python', line_numbers=True)
@@ -192,7 +190,7 @@ class Home:
 
     st.plotly_chart(
         plots.plot_forecast(
-            title=f'Série Temporal - Previsão / SMAPE = {smape}',
+            title=f'Série Temporal - Previsão / SMAPE = {metrics.smape}',
             y_val=y_val,
             y_pred=y_pred
         ),

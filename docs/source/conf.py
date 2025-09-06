@@ -16,6 +16,14 @@ copyright = '2025, Zairo Bastos'
 author = 'Zairo Bastos'
 release = '1.0.0'
 
+html_context = {
+    "display_github": True,
+    "github_user": "zairobastos",
+    "github_repo": "llm4time",
+    "github_version": "main",
+    "conf_py_path": "/docs/source/"
+}
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

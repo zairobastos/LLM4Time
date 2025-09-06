@@ -29,12 +29,11 @@ def select_columns(
       df (pd.DataFrame): DataFrame original contendo as colunas de interesse.
       date_col (str): Nome da coluna que contém as datas.
       value_col (str): Nome da coluna que contém os valores.
-      duplicates : str | None
-          Como tratar dados duplicados:
-          - "first" → mantém a primeira ocorrência.
-          - "last" → mantém a última ocorrência.
-          - "sum" → soma os valores duplicados.
-          - None → não remove duplicatas.
+      duplicates (str | None): Como tratar dados duplicados:
+        "first" → mantém a primeira ocorrência.
+        "last" → mantém a última ocorrência.
+        "sum" → soma os valores duplicados.
+        None → não remove duplicatas.
 
   Returns:
       pd.DataFrame: DataFrame padronizado com colunas `date` e `value`, ordenado por `date`.
@@ -85,13 +84,14 @@ def normalize(
       df (pd.DataFrame): DataFrame contendo obrigatoriamente a coluna 'date'.
       freq (str): Frequência da série temporal (ex.: 'D' = diário, 'M' = mensal, 'H' = horário).
       start (str, optional): Data inicial do intervalo (ex.: "2020-01" ou "2020-01-01").
-                            Se None, usa data mínima em `df["date"]`. Defaults to None.
+                            Se None, usa data mínima em `df["date"]`.
+                            Padrão: None.
       end (str, optional): Data final do intervalo (ex.: "2024-12" ou "2024-12-31").
-                          Se None, usa data máxima em `df["date"]`. Defaults to None.
+                          Se None, usa data máxima em `df["date"]`.
+                          Padrão: None.
 
   Returns:
-      pd.DataFrame: DataFrame expandido para conter todas as datas no intervalo definido,
-                    com valores ausentes preenchidos como NaN.
+      pd.DataFrame: DataFrame expandido para conter todas as datas no intervalo definido, com valores ausentes preenchidos como NaN.
 
   Examples:
       >>> df = pd.DataFrame({"date": pd.to_datetime(["2021-01-01", "2021-01-03"]), "value": [10, 30]})
@@ -116,7 +116,7 @@ def split(df: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tup
   """
   Divide uma série temporal em conjunto de treino e validação com base em datas de corte.
 
-  O conjunto de treino contém as observações no intervalo entre `start_date` e `end_date` (inclusive),
+  O conjunto de treino contém as observações no intervalo entre `start_date` e `end_date`,
   enquanto o conjunto de validação contém as observações após `end_date`, limitado a `periods` valores.
 
   Args:
@@ -137,10 +137,6 @@ def split(df: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tup
       ... })
       >>> split(df, start_date="2025-01-01", end_date="2025-01-02", periods=2)
       ([('2025-01-01', 10.123), ('2025-01-02', 20.456)], [30.789, 40.321])
-
-      >>> # Dividindo série com mais períodos de validação disponíveis que solicitados
-      >>> split(df, start_date="2025-01-01", end_date="2025-01-01", periods=1)
-      ([('2025-01-01', 10.123)], [20.456])
   """
   df_train = df.query("date >= @start_date and date <= @end_date")
   df_val = df.query("date > @end_date")

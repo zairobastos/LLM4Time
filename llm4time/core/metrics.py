@@ -1,30 +1,38 @@
 from .evaluate.metrics import Metrics
+from .evaluate.statistics import Statistics
 
 
-def evaluate(y_val: list[float], y_pred: list[float]) -> tuple[float, float, float]:
+def evaluate(y_val: list[float], y_pred: list[float]) -> tuple[Metrics, Statistics, Statistics]:
   """
-  Avalia a performance de previsões de séries temporais usando métricas comuns.
+  Avalia previsões de séries temporais e calcula estatísticas descritivas.
 
-  Calcula sMAPE, MAE e RMSE comparando os valores reais (`y_val`) com as previsões (`y_pred`).
+  Esta função cria instâncias das classes ``Metrics`` e ``Statistics``
+  para fornecer uma análise completa das previsões de séries temporais,
+  incluindo métricas de erro e estatísticas descritivas tanto dos valores
+  observados quanto dos valores preditos.
 
   Args:
-      y_val (list[float]): Valores reais da série temporal (conjunto de validação).
-      y_pred (list[float]): Valores previstos correspondentes.
+      y_val (list[float]): Lista de valores observados (reais).
+      y_pred (list[float]): Lista de valores preditos pelo modelo.
 
   Returns:
-      tuple[float, float, float]: Métricas de avaliação:
-          - sMAPE (Symmetric Mean Absolute Percentage Error)
-          - MAE (Mean Absolute Error)
-          - RMSE (Root Mean Squared Error)
+      tuple[Metrics, Statistics, Statistics]:
+          - metrics (Metrics): Instância contendo métricas de erro.
+          - stats_val (Statistics): Instância com estatísticas da série observada.
+          - stats_pred (Statistics): Instância com estatísticas da série predita.
 
   Examples:
-      >>> y_val = [100, 200, 300]
-      >>> y_pred = [110, 190, 310]
-      >>> evaluate(y_val, y_pred)
-      (0.0667, 10.0, 12.9099)
+      >>> y_val = [10, 20, 30, 40]
+      >>> y_pred = [12, 18, 29, 41]
+      >>> metrics, val_stats, pred_stats = evaluate(y_val, y_pred)
+      >>> print(metrics.mae, metrics.rmse, metrics.smape)
+      1.5 1.58 5.0
+      >>> print(val_stats.mean, pred_stats.mean)
+      25.0 25.0
+      >>> print(val_stats.missing_count, pred_stats.missing_count)
+      0 0
   """
   metrics = Metrics(y_val, y_pred)
-  smape = metrics.smape()
-  mae = metrics.mae()
-  rmse = metrics.rmse()
-  return smape, mae, rmse
+  stats_val = Statistics(y_val)
+  stats_pred = Statistics(y_pred)
+  return metrics, stats_val, stats_pred

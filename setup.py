@@ -19,6 +19,7 @@ setup(name="llm4time",
       license="MIT License",
       author="Zairo Bastos",
       author_email="zairobastos@gmail.com",
+      url="https://github.com/zairobastos/LLM4Time",
       long_description=readme,
       long_description_content_type="text/markdown",
       keywords=[

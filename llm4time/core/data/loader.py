@@ -26,15 +26,14 @@ def load_data(
       path (str): Caminho para o arquivo CSV a ser carregado.
       date_col (str): Nome da coluna que contém as datas/timestamps.
       value_col (str): Nome da coluna que contém os valores da série temporal.
-      duplicates (str | None, optional): Estratégia para tratamento de duplicatas.
-          Valores aceitos: "first", "last", None. Defaults to "first".
-          - "first": Mantém a primeira ocorrência de valores duplicados
-          - "last": Mantém a última ocorrência de valores duplicados
-          - None: Não aplica tratamento de duplicatas
+      duplicates (str | None): Como tratar dados duplicados:
+        "first" → mantém a primeira ocorrência.
+        "last" → mantém a última ocorrência.
+        "sum" → soma os valores duplicados.
+        None → não remove duplicatas.
 
   Returns:
-      pd.DataFrame | None: DataFrame contendo os dados processados com as colunas
-                          selecionadas, ou None em caso de erro no carregamento.
+      pd.DataFrame | None: DataFrame contendo os dados processados com as colunas selecionadas, ou None em caso de erro no carregamento.
 
   Examples:
       >>> df = load_data(

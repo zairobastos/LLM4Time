@@ -6,8 +6,6 @@ import sqlite3
 from ..core.logging import logger
 
 
-# ---------------- Exceções ----------------
-
 class ModelNotFoundError(Exception):
   """
   Exceção levantada quando um modelo não é encontrado na tabela models.
@@ -27,8 +25,6 @@ class ModelAlreadyExistsError(Exception):
   """
   pass
 
-
-# ---------------- CRUD ----------------
 
 class CrudModels:
   """

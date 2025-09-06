@@ -15,7 +15,7 @@ class Statistics:
   """
   Classe para calcular estatísticas descritivas de séries temporais.
 
-  Esta classe fornece métodos para calcular medidas estatísticas robustas
+  Esta classe fornece propriedades para calcular medidas estatísticas robustas
   de séries temporais, tratando automaticamente valores ausentes e fornecendo
   análises de tendência e sazonalidade.
 
@@ -29,9 +29,9 @@ class Statistics:
   Examples:
       >>> data = [10.5, 12.0, np.nan, 15.2, 13.8, 11.1]
       >>> stats = Statistics(data)
-      >>> stats.mean()
+      >>> stats.mean
       12.52
-      >>> stats.missing_count()
+      >>> stats.missing_count
       1
   """
 
@@ -45,62 +45,47 @@ class Statistics:
     self.data = np.array(data)
     self.valid_data = np.array(data)[~np.isnan(data)]
 
+  @property
   def mean(self) -> float:
     """
     Calcula a média dos valores válidos.
 
     Returns:
         float: Média arredondada para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30])
-        >>> stats.mean()
-        20.0
     """
     return round(float(np.mean(self.valid_data)), 4)
 
+  @property
   def median(self) -> float:
     """
     Calcula a mediana dos valores válidos.
 
     Returns:
         float: Mediana arredondada para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30, 40])
-        >>> stats.median()
-        25.0
     """
     return round(float(np.median(self.valid_data)), 4)
 
+  @property
   def first_quartile(self) -> float:
     """
     Calcula o primeiro quartil (percentil 25) dos valores válidos.
 
     Returns:
         float: Primeiro quartil arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30, 40])
-        >>> stats.first_quartile()
-        17.5
     """
     return round(float(np.percentile(self.valid_data, 25)), 4)
 
+  @property
   def third_quartile(self) -> float:
     """
     Calcula o terceiro quartil (percentil 75) dos valores válidos.
 
     Returns:
         float: Terceiro quartil arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30, 40])
-        >>> stats.third_quartile()
-        32.5
     """
     return round(float(np.percentile(self.valid_data, 75)), 4)
 
+  @property
   def std(self) -> float:
     """
     Calcula o desvio padrão amostral dos valores válidos.
@@ -109,67 +94,46 @@ class Statistics:
 
     Returns:
         float: Desvio padrão arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30])
-        >>> stats.std()
-        10.0
     """
     return round(float(np.std(self.valid_data, ddof=1)), 4)
 
+  @property
   def min(self) -> float:
     """
     Encontra o valor mínimo dos valores válidos.
 
     Returns:
         float: Valor mínimo arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30])
-        >>> stats.min()
-        10.0
     """
     return round(float(np.min(self.valid_data)), 4)
 
+  @property
   def max(self) -> float:
     """
     Encontra o valor máximo dos valores válidos.
 
     Returns:
         float: Valor máximo arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, 20, 30])
-        >>> stats.max()
-        30.0
     """
     return round(float(np.max(self.valid_data)), 4)
 
+  @property
   def missing_count(self) -> int:
     """
     Conta o número de valores ausentes (NaN) nos dados.
 
     Returns:
         int: Quantidade de valores NaN.
-
-    Examples:
-        >>> stats = Statistics([10, np.nan, 30, np.nan])
-        >>> stats.missing_count()
-        2
     """
     return int(np.isnan(self.data).sum())
 
+  @property
   def missing_percentage(self) -> float:
     """
     Calcula a porcentagem de valores ausentes nos dados.
 
     Returns:
         float: Percentual de valores NaN arredondado para 4 casas decimais.
-
-    Examples:
-        >>> stats = Statistics([10, np.nan, 30, np.nan])
-        >>> stats.missing_percentage()
-        50.0
     """
     total = len(self.data)
     missing = self.missing_count()
@@ -210,10 +174,6 @@ class Statistics:
         ... })
         >>> trend, seasonal, resid, t_str, s_str = Statistics.trend_seasonality(data, period=12)
         >>> # Retorna componentes decompostos e forças calculadas
-
-        >>> # Com frequência específica
-        >>> trend, seasonal, resid, t_str, s_str = Statistics.trend_seasonality(data, freq="M")
-        >>> # Aplica frequência mensal antes da decomposição
     """
     df = df.copy()
 

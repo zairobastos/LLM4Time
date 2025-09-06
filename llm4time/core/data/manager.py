@@ -24,11 +24,7 @@ def save(df: pd.DataFrame, path: str) -> None:
   Examples:
       >>> df = pd.DataFrame({'date': ['2023-01-01', '2023-01-02'],
       ...                    'value': [10.5, 12.3]})
-      >>> save(df, "dados_processados.csv")
-      # Arquivo salvo em dados_processados.csv
-
-      >>> # Salvando em diretório específico
-      >>> save(df, "output/serie_temporal_limpa.csv")
-      # Arquivo salvo em output/serie_temporal_limpa.csv
+      >>> save(df, "etth2.csv")
+      # Arquivo salvo em etth2.csv
   """
   df.to_csv(path, index=False)

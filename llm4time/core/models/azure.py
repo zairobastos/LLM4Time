@@ -50,8 +50,8 @@ class AzureOpenAI(Model):
 
     Args:
         content (str): Conteúdo da mensagem do usuário a ser enviada.
-        temperature (float, optional): Grau de aleatoriedade da resposta (0 a 2).
-                                       Defaults to 0.7.
+        temperature (float, optional): Grau de aleatoriedade da resposta.
+                                       Padrão: 0.7.
         **kwargs: Argumentos adicionais passados para `client.chat.completions.create`.
 
     Returns:
@@ -62,9 +62,8 @@ class AzureOpenAI(Model):
             - response_time: Tempo total da requisição em segundos.
 
     Examples:
-        >>> content = "Série temporal: [199.99, 190.10, 180.01, 178.45, 160.33]. Preveja próximos 3 valores."
         >>> response, prompt_tokens, response_tokens, time_sec = model.predict(
-        ...     content=content,
+        ...     content="Série temporal: [199.99, 190.10, 180.01, 178.45, 160.33]. Preveja próximos 3 valores.",
         ...     temperature=0.5
         ... )
         >>> print(response)

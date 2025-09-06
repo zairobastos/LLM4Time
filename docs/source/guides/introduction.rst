@@ -146,15 +146,12 @@ Avaliação de métricas
     ts_type=TSType.NUMERIC
   )
 
-  """
-  sMAPE: Erro percentual simétrico médio.
-  MAE: Erro absoluto médio.
-  RMSE: Raiz do erro quadrático médio.
-  """
-  smape, mae, rmse = evaluate(y_val, y_pred)
-  print(f"sMAPE: {smape}")
-  print(f"MAE: {mae}")
-  print(f"RMSE: {rmse}")
+  metrics, val_stats, pred_stats = evaluate(y_val, y_pred)
+
+  # Métricas de erro
+  print(f"sMAPE: {metrics.smape}") # Erro percentual simétrico médio
+  print(f"MAE: {metrics.mae}")     # Erro absoluto médio
+  print(f"RMSE: {metrics.rmse}")   # Raiz do erro quadrático médio
 
 
 Visualização interativa
