@@ -136,7 +136,7 @@ class Statistics:
         float: Percentual de valores NaN arredondado para 4 casas decimais.
     """
     total = len(self.data)
-    missing = self.missing_count()
+    missing = self.missing_count
     return round(float((missing / total) * 100) if total > 0 else 0.0, 4)
 
   @staticmethod
