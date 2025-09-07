@@ -68,25 +68,22 @@ docker compose up
 #### 1. Carregamento dos dados
 ```python
 from llm4time.core.data import loader
-from llm4time.visualization import plots
+from llm4time.core.evaluate import Statistics
 
 # Carrega os dados CSV, XLSX, JSON ou Parquet
 df = loader.load_data("etth2.csv")
 
 # Estatísticas descritivas
-stats = Statistics(df["value"])
+stats = Statistics(df['OT'])
 print(f"Média: {stats.mean}")
 print(f"Mediana: {stats.median}")
-print(f"1º Quartil: {stats.first_quartile}")
-print(f"3º Quartil: {stats.third_quartile}")
+print(f"1° Quartil: {stats.first_quartile}")
+print(f"3° Quartil: {stats.third_quartile}")
 print(f"Desvio padrão: {stats.std}")
 print(f"Mínimo: {stats.min}")
 print(f"Máximo: {stats.max}")
-print(f"Valores ausentes: {stats.missing_count}")
-print(f"Percentual ausente: {stats.missing_percentage}%")
-
-# Gráfico da série temporal
-plots.plot_time_series('Série Temporal - ETTh2', df)
+print(f"Quantidade de dados ausentes: {stats.missing_count}")
+print(f"Percentual de dados ausentes: {stats.missing_percentage}")
 ```
 #### 2. Pré-processamento
 ```python
