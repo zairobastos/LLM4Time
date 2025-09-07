@@ -52,7 +52,7 @@ Pré-processamento e tratamento de dados
   from llm4time.core.data import preprocessor
 
   # Padroniza para o formato de série temporal
-  df = preprocessor.padronize(
+  df = preprocessor.standardize(
     df,
     date_col='date',    # Nome da coluna que contém as datas/timestamps
     value_col='OT',     # Nome da coluna que contém os valores da série temporal
