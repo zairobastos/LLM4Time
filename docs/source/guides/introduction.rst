@@ -24,14 +24,25 @@ Pré-processamento e tratamento de dados
 .. code-block:: python
 
   from llm4time.core.data import loader
+  from llm4time.visualization import plots
 
-  # Cria um dataset com as colunas 'date' e 'value'.
-  df = loader.load_data(
-    'etth2.csv',        # Caminho do arquivo CSV com os dados
-    date_col='date',    # Nome da coluna que contém as datas/timestamps
-    value_col='OT',     # Nome da coluna que contém os valores da série temporal
-    duplicates='first'  # Como tratar linhas duplicadas: 'first' mantém a primeira ocorrência
-  )
+  # Carrega os dados CSV, XLSX, JSON ou Parquet
+  df = loader.load_data("etth2.csv")
+
+  # Estatísticas descritivas
+  stats = Statistics(df["value"])
+  print(f"Média: {stats.mean}")
+  print(f"Mediana: {stats.median}")
+  print(f"1º Quartil: {stats.first_quartile}")
+  print(f"3º Quartil: {stats.third_quartile}")
+  print(f"Desvio padrão: {stats.std}")
+  print(f"Mínimo: {stats.min}")
+  print(f"Máximo: {stats.max}")
+  print(f"Valores ausentes: {stats.missing_count}")
+  print(f"Percentual ausente: {stats.missing_percentage}%")
+
+  # Gráfico da série temporal
+  plots.plot_time_series('Série Temporal - ETTh2', df)
 
 2. Pré-processamento
 --------------------
@@ -40,13 +51,16 @@ Pré-processamento e tratamento de dados
 
   from llm4time.core.data import preprocessor
 
-  # Garante que todas as datas dentro do intervalo estejam presentes.
-  df = preprocessor.normalize(
+  # Padroniza para o formato de série temporal
+  df = preprocessor.padronize(
     df,
-    freq='h',  # Frequência da série temporal ('h' = hora, 'd' = dia, etc.)
-    start='2016-07-01 00:00:00',
-    end='2018-06-26 19:00:00'
+    date_col='date',    # Nome da coluna que contém as datas/timestamps
+    value_col='OT',     # Nome da coluna que contém os valores da série temporal
+    duplicates='first'  # Como tratar linhas duplicadas: 'first' mantém a primeira ocorrência
   )
+
+  # Garante que todas as datas/horas estejam presentes.
+  df = preprocessor.normalize(df, freq='h')
 
 3. Imputação de dados ausentes
 ------------------------------

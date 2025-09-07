@@ -1,20 +1,21 @@
 import streamlit as st
-from components.home import Home
 from lib.api import API
 from lib.crud import crud_models
 from lib.crud import crud_history
 from utils.paths import abspath
+from components.home import Home
 import pandas as pd
 import os
 
 # LLM4Time
+from llm4time.core.data import loader
+from llm4time.core.data import preprocessor
 from llm4time.core.models import Provider
 from llm4time.core.prompts import PromptType
 from llm4time.core.formatting import TSFormat, TSType
-from llm4time.core.data import preprocessor
-from llm4time.core import prompt as pmpt
 from llm4time.core.formatter import parse
 from llm4time.core.metrics import evaluate
+from llm4time.core import prompt
 
 
 with st.sidebar:
@@ -38,7 +39,7 @@ with st.sidebar:
 
   if dataset:
     st.write(f"#### ⚙️ Configurações do Prompt")
-    df = pd.read_csv(abspath(f'uploads/{dataset}'))
+    df = loader.load_data(abspath(f'uploads/{dataset}'))
     min_date = pd.to_datetime(df['date']).min().date()
     max_date = pd.to_datetime(df['date']).max().date()
 
@@ -112,7 +113,7 @@ else:
   Home.train_section(train)
 
   try:
-    prompt = pmpt.generate(
+    content = prompt.generate(
         train=train,
         periods=periods,
         prompt_type=prompt_type,
@@ -121,16 +122,16 @@ else:
 
     Home.prompt_section(
         train,
-        prompt=prompt,
+        prompt=content,
         prompt_type=prompt_type)
 
     api = API(model, provider, temperature)
 
-    # y_pred, total_tokens_prompt, total_tokens_response, response_time = (
-    #     api.response(prompt))
-
     y_pred, total_tokens_prompt, total_tokens_response, response_time = (
-        API.mock(periods, ts_format, ts_type))
+        api.response(content))
+
+    # y_pred, total_tokens_prompt, total_tokens_response, response_time = (
+    #     API.mock(periods, ts_format, ts_type))
 
     y_pred = parse(y_pred, ts_format=ts_format, ts_type=ts_type)
 
@@ -151,7 +152,7 @@ else:
         start_date=start_date,
         end_date=end_date,
         periods=periods,
-        prompt=prompt,
+        prompt=content,
         prompt_type=prompt_type,
         ts_format=ts_format,
         ts_type=ts_type,
@@ -182,5 +183,5 @@ else:
       st.error("Erro ao gerar a análise.", icon="🚨")
   except ValueError as e:
     st.toast(e, icon="🚨")
-  except:
+  except Exception:
     st.toast("Houve um erro inesperado durante a previsão.", icon="🚨")

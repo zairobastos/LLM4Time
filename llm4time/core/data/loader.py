@@ -5,48 +5,45 @@ Este módulo fornece funcionalidades para carregar e processar dados de séries
 temporais.
 """
 
+import os
 import pandas as pd
 from llm4time.core.logging import logger
-from .preprocessor import select_columns
 
 
-def load_data(
-    path: str,
-    date_col: str,
-    value_col: str,
-    duplicates: str | None = "first"
-) -> pd.DataFrame | None:
+def load_data(path: str) -> pd.DataFrame | None:
   """
-  Carrega dados de séries temporais a partir de um arquivo CSV.
+  Carrega dados de séries temporais a partir de um arquivo.
 
-  Esta função lê um arquivo CSV e seleciona as colunas especificadas para análise
-  de séries temporais, aplicando tratamento de duplicatas conforme necessário.
+  Esta função identifica a extensão do arquivo e utiliza a função de leitura
+  apropriada do pandas. Formatos suportados: CSV, XLSX, JSON, Parquet.
 
   Args:
-      path (str): Caminho para o arquivo CSV a ser carregado.
-      date_col (str): Nome da coluna que contém as datas/timestamps.
-      value_col (str): Nome da coluna que contém os valores da série temporal.
-      duplicates (str | None): Como tratar dados duplicados:
-        "first" → mantém a primeira ocorrência.
-        "last" → mantém a última ocorrência.
-        "sum" → soma os valores duplicados.
-        None → não remove duplicatas.
+      path (str): Caminho para o arquivo a ser carregado.
 
   Returns:
-      pd.DataFrame | None: DataFrame contendo os dados processados com as colunas selecionadas, ou None em caso de erro no carregamento.
+      pd.DataFrame | None: DataFrame contendo os dados carregados ou None em caso de erro.
 
   Examples:
-      >>> df = load_data(
-      ...     path="etth2.csv",
-      ...     date_col="date",
-      ...     value_col="OT",
-      ...     duplicates="first"
-      ... )
+      >>> df = load_data("etth2.csv")
   """
   try:
-    df = pd.read_csv(path)
-    df = select_columns(df, date_col, value_col, duplicates)
+    _, ext = os.path.splitext(path)
+    ext = ext.lower()
+
+    if ext in [".csv", ".txt"]:
+      df = pd.read_csv(path)
+    elif ext in [".xlsx", ".xls"]:
+      df = pd.read_excel(path)
+    elif ext == ".json":
+      df = pd.read_json(path)
+    elif ext == ".parquet":
+      df = pd.read_parquet(path)
+    else:
+      logger.error(f"Extensão de arquivo não suportada: {ext}")
+      return None
+
     return df
+
   except FileNotFoundError as e:
     logger.error(f"Arquivo não encontrado: {e}")
     return None
@@ -55,3 +52,4 @@ def load_data(
     return None
   except Exception as e:
     logger.error(f"Ocorreu um erro inesperado: {e}")
+    return None

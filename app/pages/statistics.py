@@ -1,11 +1,11 @@
 import streamlit as st
-from components.statistics import Statistics
+from components.statistics import Statistics as Component
 from utils.paths import abspath
-import pandas as pd
 import os
 
 # LLM4Time
-from llm4time.core.evaluate.statistics import Statistics as Stats
+from llm4time.core.data import loader
+from llm4time.core.evaluate.statistics import Statistics
 from llm4time.visualization import plots
 
 
@@ -28,13 +28,13 @@ elif not dataset:
            icon="⚠️")
 
 elif dataset:
-  df = pd.read_csv(abspath(f"uploads/{dataset}"))
+  df = loader.load_data(abspath(f"uploads/{dataset}"))
 
   trend, seasonal, resid, t_strength, s_strength = (
-      Stats.trend_seasonality(df))
+      Statistics.trend_seasonality(df))
 
   st.write("### Descrição")
-  Statistics.header(
+  Component.header(
       df,
       df_name=dataset,
       t_strength=t_strength,

@@ -1,6 +1,6 @@
 import streamlit as st
-from lib.crud import crud_history
 import pandas as pd
+from lib.crud import crud_history
 
 
 st.write("## Melhores modelos na previsão de séries temporais")

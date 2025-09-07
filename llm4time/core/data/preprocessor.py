@@ -9,21 +9,22 @@ normalização de frequência temporal, e divisão de dados para treino e valida
 import pandas as pd
 
 
-def select_columns(
+def standardize(
     df: pd.DataFrame,
     date_col: str,
     value_col: str,
-    duplicates: str | None = "first"
+    duplicates: str = None
 ) -> pd.DataFrame:
   """
-  Seleciona e renomeia colunas de um DataFrame para uma série temporal padrão.
+  Padroniza um DataFrame para o formato de série temporal.
 
   Realiza os seguintes passos:
     1. Seleciona apenas as colunas `date_col` e `value_col`.
     2. Renomeia `date_col` para "date" e `value_col` para "value".
     3. Converte a coluna "date" para datetime.
     4. Ordena o DataFrame pela coluna "date" em ordem crescente.
-    5. Reseta os índices do DataFrame resultante.
+    5. Remove ou agrega duplicatas conforme o parâmetro `duplicates`.
+    6. Reseta os índices do DataFrame resultante.
 
   Args:
       df (pd.DataFrame): DataFrame original contendo as colunas de interesse.
@@ -44,7 +45,7 @@ def select_columns(
       ...     "col2": [30, 10, 20],
       ...     "col3": ["a", "b", "c"]
       ... })
-      >>> select_columns(df, date_col="col1", value_col="col2")
+      >>> padronize(df, date_col="col1", value_col="col2")
               date  value
       0 2025-01-01     10
       1 2025-01-02     20
@@ -58,11 +59,11 @@ def select_columns(
   df = df.sort_values('date', ascending=True).reset_index(drop=True)
 
   if duplicates == "first":
-    df = df.drop_duplicates(subset=[date_col], keep="first")
+    df = df.drop_duplicates(subset=["date"], keep="first")
   elif duplicates == "last":
-    df = df.drop_duplicates(subset=[date_col], keep="last")
+    df = df.drop_duplicates(subset=["date"], keep="last")
   elif duplicates == "sum":
-    df = df.groupby(date_col, as_index=False)[value_col].sum()
+    df = df.groupby("date", as_index=False)["value"].sum()
 
   return df
 
