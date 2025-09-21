@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS {table_name} (
   end_date TEXT,
   periods INTEGER,
   prompt TEXT,
-  prompt_type TEXT CHECK(prompt_type IN ('ZERO_SHOT', 'FEW_SHOT', 'COT','COT_FEW')),
-  ts_format,
-  ts_type,
+  prompt_type TEXT CHECK(prompt_type IN ('ZERO_SHOT', 'FEW_SHOT', 'COT','COT_FEW', 'CUSTOM')),
+  examples INTEGER,
+  sampling TEXT CHECK(sampling IN ('FRONTEND', 'BACKEND', 'RANDOM', 'UNIFORM')),
+  ts_format TEXT CHECK(ts_format IN ('ARRAY', 'TSV', 'PLAIN', 'JSON', 'MARKDOWN', 'CONTENT', 'SYMBOL', 'CSV', 'CUSTOM')),
+  ts_type TEXT CHECK(ts_type IN ('NUMERIC', 'TEXTUAL')),
   y_val TEXT,
   y_pred TEXT,
   smape REAL,
@@ -38,4 +40,12 @@ CREATE TABLE IF NOT EXISTS {table_name} (
   name TEXT NOT NULL,
   provider TEXT NOT NULL,
   UNIQUE(name, provider)
+)"""
+
+PROMPTS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS {table_name} (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  content TEXT NOT NULL,
+  variables TEXT
 )"""

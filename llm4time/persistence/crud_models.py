@@ -48,7 +48,7 @@ class CrudModels:
 
     Args:
         db_path (str, optional): Caminho para o arquivo do banco de dados.
-                                Defaults to 'database/database.db'.
+                                 Padrão: 'database/database.db'.
     """
     self.connection = sqlite3.connect(db_path)
     self.cursor = self.connection.cursor()
@@ -80,15 +80,15 @@ class CrudModels:
     try:
       self.cursor.execute(
           "INSERT INTO models (name, provider) VALUES (?, ?)",
-          (name, provider)
-      )
+          (name, provider))
+
       self.connection.commit()
       logger.info("Dados inseridos com sucesso na tabela models.")
       return True
     except sqlite3.IntegrityError as e:
       raise ModelAlreadyExistsError(
-          f"O modelo '{name}' já existe para o provedor '{provider}'."
-      )
+          f"O modelo '{name}' já existe para o provedor '{provider}'.")
+
     except sqlite3.Error as e:
       logger.error(f"Erro ao inserir dados na tabela models: {e}")
       return False
@@ -180,8 +180,8 @@ class CrudModels:
         # Verifica existência do registro
         self.cursor.execute(
             "SELECT COUNT(*) FROM models WHERE name = ? AND provider = ?",
-            (name, provider)
-        )
+            (name, provider))
+
         if self.cursor.fetchone()[0] == 0:
           logger.warning(
               f"Registro com modelo '{name}' e provedor '{provider}' não encontrado.")
@@ -191,8 +191,8 @@ class CrudModels:
         # Remove o registro
         self.cursor.execute(
             "DELETE FROM models WHERE name = ? AND provider = ?",
-            (name, provider)
-        )
+            (name, provider))
+
         logger.info(
             f"Registro com modelo '{name}' e provedor '{provider}' removido com sucesso.")
         results[(name, provider)] = True
@@ -234,28 +234,26 @@ class CrudModels:
       # Verifica existência do registro
       self.cursor.execute(
           "SELECT COUNT(*) FROM models WHERE name = ? AND provider = ?",
-          (old_name, provider)
-      )
+          (old_name, provider))
+
       if self.cursor.fetchone()[0] == 0:
         raise ModelNotFoundError(
-            f"Registro com modelo '{old_name}' e provedor '{provider}' não encontrado."
-        )
+            f"Registro com modelo '{old_name}' e provedor '{provider}' não encontrado.")
 
       # Verifica se já existe conflito com o novo nome
       self.cursor.execute(
           "SELECT COUNT(*) FROM models WHERE name = ? AND provider = ?",
-          (new_name, provider)
-      )
+          (new_name, provider))
+
       if self.cursor.fetchone()[0] > 0:
         raise ModelAlreadyExistsError(
-            f"Já existe registro com modelo '{new_name}' e provedor '{provider}'."
-        )
+            f"Já existe registro com modelo '{new_name}' e provedor '{provider}'.")
 
       # Atualiza o nome
       self.cursor.execute(
           "UPDATE models SET name = ? WHERE name = ? AND provider = ?",
-          (new_name, old_name, provider)
-      )
+          (new_name, old_name, provider))
+
       self.connection.commit()
       logger.info(
           f"Modelo '{old_name}' renomeado para '{new_name}' com sucesso (provider='{provider}').")

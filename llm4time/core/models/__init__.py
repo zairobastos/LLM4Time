@@ -13,13 +13,13 @@ class Provider(str, Enum):
   def __str__(self):
     return {
         Provider.LM_STUDIO: "LM Studio",
-        Provider.OPENAI: "OpenAI / Ollama",
-        Provider.AZURE: "OpenAI Azure",
+        Provider.OPENAI: "OpenAI",
+        Provider.AZURE: "Azure",
     }[self]
 
   @classmethod
   def enum(cls, name: str):
-    for member in cls:
-      if str(member) == name:
-        return member
+    for m in cls:
+      if str(m) == name:
+        return m
     return None

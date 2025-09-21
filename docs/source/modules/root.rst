@@ -47,6 +47,12 @@ Tipos de prompts
    :members:
    :undoc-members:
 
+Estratégias de amostragem
+----------------------------
+.. automodule:: llm4time.core.data
+   :members:
+   :undoc-members:
+
 Formatos de série temporal
 --------------------------
 .. automodule:: llm4time.core.formatting.parsers

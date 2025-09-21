@@ -1,8 +1,8 @@
-import streamlit as st
-from utils.paths import abspath
-from datetime import datetime
-import pandas as pd
 import os
+import pandas as pd
+import streamlit as st
+from datetime import datetime
+from utils.paths import abspath
 
 # LLM4Time
 from llm4time.core.data import loader
@@ -314,13 +314,6 @@ if datasets:
 
   data = st.data_editor(
       pd.DataFrame(info),
-      column_config={
-          "Excluir": st.column_config.CheckboxColumn(
-              "Excluir",
-              help="Marque para excluir o arquivo",
-              default=False
-          )
-      },
       disabled=["Linhas", "Tipo", "Tamanho (MB)", "Modificação"],
       hide_index=True,
       use_container_width=True

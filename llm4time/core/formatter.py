@@ -73,6 +73,7 @@ def parse(ts: str, ts_format: TSFormat, ts_type: TSType) -> list:
   if ts_type not in DECODERS:
     raise ValueError(f"Tipo desconhecido: {ts_type}")
   try:
-    return DECODERS[ts_type](PARSERS[ts_format](ts))
+    return (DECODERS[ts_type](PARSERS[ts_format](ts)) or
+            DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](ts)))
   except:
     return DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](ts))

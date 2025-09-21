@@ -38,7 +38,7 @@ class CrudHistory:
 
     Args:
         db_path (str, optional): Caminho para o arquivo do banco de dados.
-                                Defaults to 'database/database.db'.
+                                 Padrão: 'database/database.db'.
     """
     self.connection = sqlite3.connect(db_path)
     self.cursor = self.connection.cursor()
@@ -58,15 +58,6 @@ class CrudHistory:
 
     Returns:
         bool: True se a inserção foi bem-sucedida, False caso contrário.
-
-    Examples:
-        >>> crud = CrudHistory()
-        >>> success = crud.insert(
-        ...     model='gpt-4',
-        ...     temperature=0.7,
-        ...     dataset='sales_data',
-        ...     smape=15.2
-        ... )
     """
     try:
       values = (
@@ -78,6 +69,8 @@ class CrudHistory:
           kwargs.get('periods'),
           kwargs.get('prompt'),
           kwargs.get('prompt_type'),
+          kwargs.get('examples'),
+          kwargs.get('sampling'),
           kwargs.get('ts_format'),
           kwargs.get('ts_type'),
           kwargs.get('y_val'),
@@ -111,6 +104,8 @@ class CrudHistory:
           periods,
           prompt,
           prompt_type,
+          examples,
+          sampling,
           ts_format,
           ts_type,
           y_val,
@@ -174,59 +169,38 @@ class CrudHistory:
       logger.info("Fechando conexão com o banco de dados.")
       self.connection.close()
 
-  def select_best_results(self) -> tuple[list, list]:
+  def group_by(self, columns: list[str]) -> tuple[list, list]:
     """
-    Seleciona os melhores resultados experimentais agrupados por configuração.
+    Agrupa resultados experimentais pelas colunas especificadas.
 
-    Para cada combinação única de parâmetros de experimento, retorna apenas
-    o resultado com melhor performance (menor SMAPE, MAE e RMSE).
+    Args:
+        columns (list[str]): Lista de nomes de colunas para agrupar e ordenar.
 
     Returns:
         tuple[list, list]: Tupla contendo:
-
-            - Lista de registros com os melhores resultados
+            - Lista de registros agrupados
             - Lista com nomes das colunas
 
           Retorna listas vazias em caso de erro.
 
-
     Examples:
         >>> crud = CrudHistory()
-        >>> best_results, columns = crud.select_best_results()
-        >>> if best_results:
-        ...     print(f"Melhor SMAPE: {best_results[0][columns.index('smape')]}")
+        >>> grouped_results, col_names = crud.group_by(['model', 'dataset', 'temperature'])
+        >>> if grouped_results:
+        ...     print(f"Número de registros retornados: {len(grouped_results)}")
     """
     try:
-      query = """
-        WITH grouped_results AS (
-          SELECT
-            *,
-            ROW_NUMBER() OVER (
-              PARTITION BY
-                model,
-                temperature,
-                dataset,
-                start_date,
-                end_date,
-                periods,
-                prompt,
-                prompt_type,
-                ts_format,
-                ts_type,
-                y_val
-              ORDER BY
-                smape ASC,
-                mae ASC,
-                rmse ASC
-            ) as rn
-          FROM history
-          WHERE smape IS NOT NULL
-            AND mae IS NOT NULL
-            AND rmse IS NOT NULL
-        )
-        SELECT * FROM grouped_results
-        WHERE rn = 1
-        ORDER BY smape ASC, mae ASC, rmse ASC
+      if not columns:
+        raise ValueError("A lista de colunas não pode estar vazia.")
+
+      cols_str = ", ".join(columns)
+      query = f"""
+            SELECT *
+            FROM history
+            WHERE smape IS NOT NULL
+              AND mae IS NOT NULL
+              AND rmse IS NOT NULL
+            ORDER BY {cols_str}
         """
 
       self.cursor.execute(query)
@@ -238,8 +212,8 @@ class CrudHistory:
 
       return results, col_names
 
-    except sqlite3.Error as e:
-      logger.error(f"Erro ao selecionar melhores resultados experimentais: {e}")
+    except (sqlite3.Error, ValueError) as e:
+      logger.error(f"Erro ao agrupar resultados: {e}")
       return [], []
     finally:
       logger.info("Fechando conexão com o banco de dados.")

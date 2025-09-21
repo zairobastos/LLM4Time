@@ -1,6 +1,7 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 from lib.crud import crud_models
+from lib.crud import crud_prompts
 from utils.env import (
     normalize, save_model_env, rename_model_env, remove_model_env)
 
@@ -8,6 +9,8 @@ from utils.env import (
 from llm4time.core.models import Provider
 from llm4time.persistence.crud_models import ModelNotFoundError
 from llm4time.persistence.crud_models import ModelAlreadyExistsError
+from llm4time.persistence.crud_prompts import PromptNotFoundError
+from llm4time.persistence.crud_prompts import PromptAlreadyExistsError
 
 
 # ---------------- Funções utilitárias ----------------
@@ -43,7 +46,6 @@ def remove_model(models: list[tuple]) -> None:
   crud_models().remove_many(models)
   for model, provider in models:
     remove_model_env(model, Provider.enum(provider))
-  st.rerun()
 
 
 def rename_model(old_model: str, new_model: str, provider: str) -> None:
@@ -83,7 +85,7 @@ if "mode" not in st.session_state:
 
 # ---------------- Seleção de API ----------------
 
-st.write("### API")
+st.write(f"### API")
 col1, col2, col3 = st.columns(3)
 with col1:
   if st.button(
@@ -159,8 +161,8 @@ elif st.session_state.mode == Provider.OPENAI:
   )
   if api_key and model and base_url and save:
     env_vars = {
-        f"openai_{normalize(model)}_key": api_key,
-        f"openai_{normalize(model)}_base_url": base_url
+        normalize(f"{Provider.OPENAI}_{model}_key"): api_key,
+        normalize(f"{Provider.OPENAI}_{model}_base_url"): base_url
     }
     save_model(model, Provider.OPENAI, env_vars)
   elif save and (not api_key or not model or not base_url):
@@ -202,9 +204,9 @@ elif st.session_state.mode == Provider.AZURE:
   )
   if model and api_key and api_version and endpoint and save:
     env_vars = {
-        f"azure_{normalize(model)}_key": api_key,
-        f"azure_{normalize(model)}_api_version": api_version,
-        f"azure_{normalize(model)}_endpoint": endpoint
+        normalize(f"{Provider.AZURE}_{model}_key"): api_key,
+        normalize(f"{Provider.AZURE}_{model}_api_version"): api_version,
+        normalize(f"{Provider.AZURE}_{model}_endpoint"): endpoint
     }
     save_model(model, Provider.AZURE, env_vars)
   elif save and (not model or not api_key or not api_version or not endpoint):
@@ -214,10 +216,10 @@ elif st.session_state.mode == Provider.AZURE:
     )
 
 
-# ---------------- Dialog confirmação de exclusão ----------------
+# ---------------- Confirmação de exclusão de modelos ----------------
 
 @st.dialog("Confirmar exclusão")
-def confirmation_dialog(models: list[tuple[str, str]]):
+def models_dialog(models: list[tuple[str, str]]):
   n = len(models)
 
   if n == 1:
@@ -236,6 +238,7 @@ def confirmation_dialog(models: list[tuple[str, str]]):
   with col2:
     if st.button("Excluir", use_container_width=True, type="primary"):
       remove_model(models)
+      st.rerun()
 
 
 # ---------------- Modelos Configurados ----------------
@@ -245,32 +248,16 @@ st.write("### Modelos Configurados")
 models = crud_models().select_all()
 
 if models:
-  info = []
-  for model in models:
-    model_id, model_name, provider = model
-    info.append({
-        "Modelo": f"🤖 {model_name}",
-        "API": provider,
-        "Remover": False
-    })
-
-  data = st.data_editor(
-      pd.DataFrame(info),
-      column_config={
-          "Remover": st.column_config.CheckboxColumn(
-              "Remover",
-              help="Marque para remover o modelo",
-              default=False,
-              width=1
-          )
-      },
+  df_models = st.data_editor(
+      pd.DataFrame([
+          {"Modelo": f"🤖 {model_name}", "API": provider, "Excluir": False}
+          for _, model_name, provider in models]),
       disabled=["API"],
       hide_index=True,
-      use_container_width=True
-  )
+      use_container_width=True)
 
   # Detecta e processa modelos renomeados automaticamente
-  for idx, row in data.iterrows():
+  for idx, row in df_models.iterrows():
     old_model = models[idx][1]
     new_model = row["Modelo"].replace("🤖 ", "")
     provider = models[idx][2]
@@ -278,34 +265,198 @@ if models:
       rename_model(old_model, new_model, provider)
 
   # Detecta modelos para excluir
-  models_to_delete = []
-  for idx, row in data.iterrows():
-    if row["Remover"]:
-      _, model, provider = models[idx]
-      models_to_delete.append((model, provider))
+  models_to_delete = [
+      (models[idx][1], models[idx][2])
+      for idx, row in df_models.iterrows()
+      if row["Excluir"]]
 
   # 'Modelo' ou 'modelos'
   n = len(models_to_delete)
   s = "s" if n > 1 else ""
 
-  if models_to_delete and st.button(label=f"🗑️ Remover {n} modelo{s}", type="primary"):
-    confirmation_dialog(models_to_delete)
+  if models_to_delete and st.button(label=f"🗑️ Excluir {n} modelo{s}", type="primary"):
+    models_dialog(models_to_delete)
 else:
-  st.write("Nenhum modelo configurado.")
+  st.info("Nenhum modelo encontrado.")
 
 
 # ---------------- Prompt personalizado ----------------
 
 st.write("---")
-st.write("### Prompt Personalizado")
-prompt = st.text_area(
-    "Prompt",
-    help="Digite o prompt que deseja utilizar.",
-    placeholder="Ex: Prever a demanda de produtos para os próximos 30 dias.",
-    height=200
+st.write("### Prompts Personalizados")
+
+prompts = crud_prompts().select_all()
+action = st.radio("Escolha a ação:", options=["Criar", "Editar"])
+prompt_name, prompt_content, prompt_variables = "", "", {}
+
+if action == "Criar":
+  prompt_name = st.text_input("Nome", placeholder="Ex: Previsão de preços")
+
+elif action == "Editar":
+  prompt_name = st.selectbox("Prompt", options=[p["name"] for p in prompts])
+  if prompt_name:
+    try:
+      prompt_data = crud_prompts().select(prompt_name)
+      prompt_content = prompt_data["content"]
+      prompt_variables = prompt_data["variables"]
+    except PromptNotFoundError:
+      st.error("Prompt não encontrado.")
+
+
+df_variables = st.data_editor(
+    pd.DataFrame(
+        [{"Chave": k, "Valor": v} for k, v in prompt_variables.items()]
+    ) if prompt_variables else pd.DataFrame(columns=["Chave", "Valor"]),
+    hide_index=True,
+    num_rows="dynamic",
+    use_container_width=True
 )
-save_prompt = st.button(
+prompt_variables = {row["Chave"]: row["Valor"]
+                    for _, row in df_variables.iterrows() if row["Chave"]}
+
+
+col1, col2 = st.columns(2)
+with col1:
+  prompt_content = st.text_area(
+      label="Prompt",
+      value=prompt_content,
+      placeholder="Ex: Faça a previsão dos próximos {n_periods_forecast} valores com base nos dados históricos fornecidos:\n\n{input}\n\nA saída deve ser uma lista contendo apenas os valores previstos.",
+      label_visibility="collapsed",
+      height=200)
+
+with col2:
+  global_variables = {
+      "input": "Date,Value\n2016-07-01,38.662\n2016-07-01,37.124\n2016-07-01,36.465\n2016-07-01,33.609\n2016-07-01,31.851\n2016-07-01,30.532\n2016-07-01,30.093\n2016-07-01,29.873\n2016-07-01,29.653\n2016-07-01,29.213\n2016-07-01,27.456\n2016-07-01,27.456\n2016-07-01,27.236\n2016-07-01,26.577\n2016-07-01,26.797\n2016-07-01,26.797\n2016-07-01,26.797\n2016-07-01,26.577\n2016-07-01,26.577\n2016-07-01,26.138\n2016-07-01,26.138\n2016-07-01,25.698\n2016-07-01,25.918\n2016-07-01,25.918\n2016-07-02,25.918\n2016-07-02,26.358\n2016-07-02,26.138\n2016-07-02,25.698\n2016-07-02,25.698\n2016-07-02,25.918",
+      "input_example": "Date,Value\n2016-07-01,38.662\n2016-07-01,37.124\n2016-07-01,36.465\n2016-07-01,33.609",
+      "output_example": "Date,Value\n2016-07-01,38.662\n2016-07-01,37.124\n2016-07-01,36.465\n2016-07-01,33.609\n2016-07-01,31.851\n2016-07-01,30.532\n2016-07-01,30.093",
+      "examples": (
+          "Exemplo 1:\n"
+          "Período (histórico):\nDate,Value\n2016-07-01,38.662\n2016-07-01,37.124\n2016-07-01,36.465\n2016-07-01,33.609\n2016-07-01,31.851\n2016-07-01,30.532\n2016-07-01,30.093\n\n"
+          "Período (previsto):\nDate,Value\n2016-07-01,29.873\n2016-07-01,29.653\n2016-07-01,29.213\n2016-07-01,27.456\n2016-07-01,27.456\n2016-07-01,27.236\n2016-07-01,26.577\n"
+      ),
+      "n_periods_input": 30,
+      "n_periods_forecast": 7,
+      "n_periods_example": 7
+  }
+  try:
+    global_variables.update(**prompt_variables)
+    st.code(prompt_content.format(**global_variables), language="python", height=200)
+  except KeyError as e:
+    st.code(f"Erro: chave {e} não encontrada.", language="python", height=200)
+  except Exception as e:
+    st.code(f"Erro: {e}", language="python", height=200)
+
+
+if st.button(
     "💾 Salvar Prompt",
-    help="Clique para salvar o prompt.",
-    type="primary",
-)
+    help="Clique para salvar o prompt",
+    type="primary"
+):
+  try:
+    if action == "Criar":
+      crud_prompts().insert(name=prompt_name, content=prompt_content, variables=prompt_variables)
+      st.rerun()
+
+    elif action == "Editar":
+      crud_prompts().update(prompt_name, prompt_content, prompt_variables)
+      st.toast(f"Prompt **'{prompt_name}'** atualizado com sucesso!", icon="✅")
+
+  except PromptAlreadyExistsError:
+    st.warning(f"Já existe um prompt chamado **'{prompt_name}'**. Escolha outro nome.")
+  except PromptNotFoundError:
+    st.warning(f"Prompt **'{prompt_name}'** não encontrado.")
+  except Exception as e:
+    st.error(f"Ocorreu um erro inesperado: {e}")
+
+
+# ---------------- Confirmação de exclusão de prompts ----------------
+
+@st.dialog("Confirmar exclusão")
+def prompts_dialog(prompt_names: list[str]):
+  n = len(prompt_names)
+
+  if n == 1:
+    prompt_name = prompt_names[0]
+    st.write(
+        f"Tem certeza que deseja excluir o prompt **'{prompt_name}'**?")
+  else:
+    st.write(f"Tem certeza que deseja excluir **{n} prompts**?")
+
+  st.caption("**⚠️ Esta ação não poderá ser desfeita.**")
+
+  col1, col2 = st.columns(2)
+  with col1:
+    if st.button("Cancelar", use_container_width=True):
+      st.rerun()
+  with col2:
+    if st.button("Excluir", use_container_width=True, type="primary"):
+      crud_prompts().remove_many(prompt_names)
+      st.rerun()
+
+
+# ---------------- Meus Prompts ----------------
+
+st.write("---")
+st.write("### Meus Prompts")
+
+if prompts:
+  df_prompts = st.data_editor(
+      pd.DataFrame([
+          {"Nome": f"📄 {p["name"]}", "Excluir": False}
+          for p in prompts]),
+      hide_index=True,
+      use_container_width=True)
+
+  # Detecta e processa prompts renomeados automaticamente
+  try:
+    for idx, row in df_prompts.iterrows():
+      old_name = prompts[idx]["name"]
+      new_name = row["Nome"].replace("📄 ", "")
+      if old_name != new_name:
+        crud_prompts().rename(old_name, new_name)
+  except PromptAlreadyExistsError:
+    st.warning(f"Já existe um prompt chamado **'{new_name}'**. Escolha outro nome.")
+  except PromptNotFoundError:
+    st.warning(f"Prompt **'{old_name}'** não encontrado.")
+  except Exception as e:
+    st.error(f"Ocorreu um erro inesperado: {e}")
+
+  # Detecta prompts para excluir
+  prompts_to_delete = [
+      prompts[idx]["name"]
+      for idx, row in df_prompts.iterrows()
+      if row["Excluir"]]
+
+  # 'prompt' ou 'prompts'
+  n = len(prompts_to_delete)
+  s = "s" if n > 1 else ""
+
+  if prompts_to_delete and st.button(label=f"🗑️ Excluir {n} prompt{s}", type="primary"):
+    prompts_dialog(prompts_to_delete)
+else:
+  st.info("Nenhum prompt encontrado.")
+
+
+# ---------------- Variáveis Globais ----------------
+
+st.write("---")
+st.write("### Variáveis Globais")
+st.write("Use variáveis globais para criar prompts dinâmicos preenchidos em tempo de execução.")
+
+st.table(pd.DataFrame([
+    {"Chave": "`{input}`",
+     "Valor": "Série temporal de entrada formatada conforme o formato e o tipo."},
+    {"Chave": "`{input_example}`",
+     "Valor": "Exemplo de entrada contendo os primeiros 4 períodos formatados."},
+    {"Chave": "`{output_example}`",
+     "Valor": "Exemplo de saída contendo o mesmo número de períodos a serem previstos formatados."},
+    {"Chave": "`{examples}`",
+     "Valor": "Exemplos contendo histórico e previsão, conforme a estratégia de amostragem."},
+    {"Chave": "`{n_periods_input}`",
+     "Valor": "Número total de períodos na série temporal de entrada."},
+    {"Chave": "`{n_periods_forecast}`",
+     "Valor": "Número de períodos a serem previstos."},
+    {"Chave": "`{n_periods_example}`",
+     "Valor": "Número de períodos em cada exemplo."},
+]).style.set_properties(
+    subset=["Valor"], **{"color": "gray"}))

@@ -8,7 +8,7 @@ o banco de dados SQLite usado pelo sistema llm4time.
 import sqlite3
 from sqlite3 import Cursor
 from contextlib import closing
-from llm4time.persistence import HISTORY_SCHEMA, MODELS_SCHEMA
+from llm4time.persistence import HISTORY_SCHEMA, MODELS_SCHEMA, PROMPTS_SCHEMA
 from llm4time.core.logging import logger
 import os
 
@@ -47,7 +47,7 @@ def create_database(db_path: str = 'database/database.db') -> None:
 
   Args:
       db_path (str, optional): Caminho para o arquivo do banco de dados.
-                              Defaults to 'database/database.db'.
+                               Padrão: 'database/database.db'.
 
   Raises:
       sqlite3.Error: Se ocorrer erro durante a criação do banco ou tabelas.
@@ -62,6 +62,7 @@ def create_database(db_path: str = 'database/database.db') -> None:
       with closing(conn.cursor()) as cursor:
         create_table(cursor, 'history', HISTORY_SCHEMA)
         create_table(cursor, 'models', MODELS_SCHEMA)
+        create_table(cursor, 'prompts', PROMPTS_SCHEMA)
       conn.commit()
     logger.info("Banco de dados e tabelas criados com sucesso.")
   except sqlite3.Error as e:

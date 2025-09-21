@@ -62,7 +62,7 @@ class Home:
   @staticmethod
   def train_section(train: list[tuple[str, float]]):
     """
-    Renderiza os dados selecionados e suas estatísticas.
+    Exibe os dados selecionados e suas estatísticas.
 
     Args:
       train (list[tuple[str, float]]): Lista de tuplas ou números.
@@ -119,8 +119,8 @@ class Home:
       prompt_type: PromptType,
   ):
     """
-    Exibe o prompt e apresenta uma visualização gráfica dos dados que serão enviados
-    ao modelo para análise e previsão.
+    Exibe o prompt e apresenta uma visualização gráfica dos dados
+    que serão enviados ao modelo para análise e previsão.
 
     Args:
       train (list[tuple[str, float]]): Lista de tuplas ou números.

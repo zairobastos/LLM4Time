@@ -1,15 +1,19 @@
+import os
+import pandas as pd
 import streamlit as st
 from lib.api import API
 from lib.crud import crud_models
+from lib.crud import crud_prompts
 from lib.crud import crud_history
 from utils.paths import abspath
+
+# Componentes
 from components.home import Home
-import pandas as pd
-import os
 
 # LLM4Time
 from llm4time.core.data import loader
 from llm4time.core.data import preprocessor
+from llm4time.core.data import Sampling
 from llm4time.core.models import Provider
 from llm4time.core.prompts import PromptType
 from llm4time.core.formatting import TSFormat, TSType
@@ -19,15 +23,13 @@ from llm4time.core import prompt
 
 
 with st.sidebar:
-  st.write(f"#### ⚙️ Configurações do Modelo")
+  st.write(f'#### ⚙️ Configurações do Modelo')
 
-  provider = st.selectbox("API", options=list(Provider))
-  models = crud_models().select(provider=str(provider))
-  models = [model[1] for model in models]
-
-  model = st.selectbox(
-      'Modelo', models, index=0,
-      help='Escolha o modelo a ser utilizado. O modelo deepseek-r1-distill-qwen-32b é o mais avançado e pode fornecer melhores resultados, mas também é mais pesado e pode levar mais response_time para gerar respostas.')
+  models = crud_models().select_all()
+  model_options = {f'{m[2]} / {m[1]}': (Provider.enum(m[2]), m[1]) for m in models}
+  selected_model = st.selectbox('Modelo', model_options.keys(), index=0,
+                                help='Escolha o modelo a ser utilizado. O modelo deepseek-r1-distill-qwen-32b é o mais avançado e pode fornecer melhores resultados, mas também é mais pesado e pode levar mais response_time para gerar respostas.')
+  provider, model = model_options.get(selected_model, (None, None))
 
   temperature = st.slider(
       label='Temperatura', min_value=0.0, max_value=1.0, value=0.7, step=0.1,
@@ -38,7 +40,7 @@ with st.sidebar:
   dataset = st.selectbox('Base de Dados', datasets)
 
   if dataset:
-    st.write(f"#### ⚙️ Configurações do Prompt")
+    st.write(f'#### ⚙️ Configurações do Prompt')
     df = loader.load_data(abspath(f'uploads/{dataset}'))
     min_date = pd.to_datetime(df['date']).min().date()
     max_date = pd.to_datetime(df['date']).max().date()
@@ -56,14 +58,36 @@ with st.sidebar:
 
     periods = st.slider(
         label='Períodos', min_value=1, max_value=96, value=24, step=1,
-        help='Número de períodos a serem previstos. Cada período representa 1 hora de previsão.')
+        help='Número de períodos a serem previstos.')
 
     prompt_type = st.selectbox(
-        label='Prompt', options=list(PromptType), index=0, format_func=lambda f: f.name,
+        label='Tipo', options=list(PromptType), index=0, format_func=lambda f: f.name,
         help='Escolha o tipo de prompt a ser utilizado.')
 
+    prompt_options = [p["name"] for p in crud_prompts().select_all()]
+
+    prompt_name = (st.selectbox(
+        label='Prompt', options=prompt_options, index=0,
+        help='Escolha o prompt a ser utilizado.')
+        if prompt_type == PromptType.CUSTOM else None)
+
+    examples = (st.slider(
+        label='Exemplos', min_value=1, max_value=5, value=1,
+        help='Número de exemplos a ser utilizado.')
+        if prompt_type in (PromptType.FEW_SHOT, PromptType.COT_FEW) else 0)
+
+    examples = (st.slider(
+        label='Exemplos', min_value=0, max_value=5, value=0,
+        help='Número de exemplos a ser utilizado.')
+        if prompt_type == PromptType.CUSTOM else examples)
+
+    sampling = (st.selectbox(
+        label='Amostragem', options=list(Sampling), index=0, format_func=lambda f: f.name,
+        help='Escolha a estratégia de amostragem a ser utilizada.')
+        if examples > 0 else Sampling.FRONTEND)
+
     ts_format = st.selectbox(
-        label='Formato dos Dados', options=list(TSFormat), index=0, format_func=lambda f: f.name,
+        label='Formato', options=list(TSFormat), index=0, format_func=lambda f: f.name,
         help='Formato de apresentação dos dados para o modelo. Diferentes formatos podem influenciar a performance do modelo.')
 
     ts_type = st.radio(
@@ -80,15 +104,19 @@ with st.sidebar:
 if not confirm:
   st.write('## LLM4Time Pipeline')
   st.write('Siga as etapas de pré-processamento dos dados e configuração do modelo no pipeline abaixo para gerar previsões.\n')
-  st.image(abspath("assets/llm4time.svg"), width=750)
+  st.image(abspath('assets/llm4time.svg'), width=750)
 
 elif not model:
-  st.toast("Modelo não selecionado. Selecione um antes de continuar.",
-           icon="⚠️")
+  st.toast('Modelo não selecionado. Selecione um antes de continuar.',
+           icon='⚠️')
 
 elif not dataset:
-  st.toast("Base de dados não selecionada. Selecione uma antes de continuar.",
-           icon="⚠️")
+  st.toast('Base de dados não selecionada. Selecione uma antes de continuar.',
+           icon='⚠️')
+
+elif prompt_type == PromptType.CUSTOM and prompt_name is None:
+  st.toast('Prompt não selecionado. Selecione um antes de continuar.',
+           icon='⚠️')
 
 
 # ---------------- Resultado ----------------
@@ -113,12 +141,23 @@ else:
   Home.train_section(train)
 
   try:
+    prompt_content, prompt_variables = None, {}
+    if prompt_type == PromptType.CUSTOM:
+      prompt_data = crud_prompts().select(prompt_name)
+      prompt_content = prompt_data['content']
+      prompt_variables = prompt_data['variables']
+
     content = prompt.generate(
         train=train,
         periods=periods,
         prompt_type=prompt_type,
         ts_format=ts_format,
-        ts_type=ts_type)
+        ts_type=ts_type,
+        sampling=sampling,
+        num_examples=examples,
+        template=prompt_content,
+        freq="hora",
+        **prompt_variables)
 
     Home.prompt_section(
         train,
@@ -126,15 +165,12 @@ else:
         prompt_type=prompt_type)
 
     api = API(model, provider, temperature)
-
     y_pred, total_tokens_prompt, total_tokens_response, response_time = (
         api.response(content))
-
     # y_pred, total_tokens_prompt, total_tokens_response, response_time = (
     #     API.mock(periods, ts_format, ts_type))
 
     y_pred = parse(y_pred, ts_format=ts_format, ts_type=ts_type)
-
     metrics, stats_val, stats_pred = evaluate(y_val, y_pred)
 
     Home.results_section(
@@ -145,7 +181,7 @@ else:
         total_tokens_response=total_tokens_response,
         response_time=response_time)
 
-    inserted = crud_history().insert(
+    saved = crud_history().insert(
         model=model,
         temperature=temperature,
         dataset=dataset,
@@ -154,6 +190,8 @@ else:
         periods=periods,
         prompt=content,
         prompt_type=prompt_type,
+        examples=examples,
+        sampling=sampling,
         ts_format=ts_format,
         ts_type=ts_type,
         y_val=str(y_val),
@@ -174,14 +212,14 @@ else:
         min_val=stats_val.min,
         min_pred=stats_pred.min,
         max_val=stats_val.max,
-        max_pred=stats_pred.max
-    )
+        max_pred=stats_pred.max)
 
-    if inserted:
-      st.toast("Análise gerada com sucesso!", icon="✅")
+    if saved:
+      st.toast('Análise gerada e salva com sucesso!', icon='✅')
     else:
-      st.error("Erro ao gerar a análise.", icon="🚨")
+      st.error('Erro ao gerar a análise.', icon='🚨')
   except ValueError as e:
-    st.toast(e, icon="🚨")
-  except Exception:
-    st.toast("Houve um erro inesperado durante a previsão.", icon="🚨")
+    st.toast(e, icon='🚨')
+  except Exception as e:
+    print(f'[ERROR] Houve um erro inesperado: {e}')
+    st.toast('Houve um erro inesperado durante a previsão.', icon='🚨')

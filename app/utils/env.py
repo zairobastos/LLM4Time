@@ -49,8 +49,8 @@ def rename_model_env(old_model: str, new_model: str, provider: Provider):
   new_model (str): Novo nome para o modelo.
   provider (Provider): Provedor da API.
   """
-  old_prefix = f"{normalize(provider)}_{normalize(old_model)}_"
-  new_prefix = f"{normalize(provider)}_{normalize(new_model)}_"
+  old_prefix = normalize(f"{provider}_{old_model}_")
+  new_prefix = normalize(f"{provider}_{new_model}_")
   if not os.path.exists(ENV_PATH):
     return
   with open(ENV_PATH) as f:
@@ -71,7 +71,7 @@ def remove_model_env(model: str, provider: Provider):
   model (str): Nome do modelo.
   provider (Provider): Provedor da API.
   """
-  prefix = f"{normalize(provider)}_{normalize(model)}_"
+  prefix = normalize(f"{provider}_{model}_")
   if not os.path.exists(ENV_PATH):
     return
   with open(ENV_PATH) as f:

@@ -43,16 +43,17 @@ class API:
     return self._call_client(lambda model: LMStudio(model), content, **kwargs)
 
   def _openai(self, content: str, **kwargs):
-    api_key = os.getenv(f'openai_{normalize(self.model)}_key')
-    base_url = os.getenv(f'openai_{normalize(self.model)}_base_url')
-    print(f'[IMPORTANT] openai_{normalize(self.model)}_key')
-    print(f'[IMPORTANT]  openai_{normalize(self.model)}_base_url')
+    api_key = os.getenv(normalize(f"{self.provider}_{self.model}_key"))
+    base_url = os.getenv(normalize(f"{self.provider}_{self.model}_base_url"))
+    print(f"[INFO] BASE_URL: {base_url}")
     return self._call_client(lambda model: OpenAI(api_key=api_key, base_url=base_url, model=model), content, **kwargs)
 
   def _azure_openai(self, content: str, **kwargs):
-    api_key = os.getenv(f'azure_{normalize(self.model)}_key')
-    endpoint = os.getenv(f'azure_{normalize(self.model)}_endpoint')
-    api_version = os.getenv(f'azure_{normalize(self.model)}_api_version')
+    api_key = os.getenv(normalize(f"{self.provider}_{self.model}_key"))
+    endpoint = os.getenv(normalize(f"{self.provider}_{self.model}_endpoint"))
+    api_version = os.getenv(normalize(f"{self.provider}_{self.model}_api_version"))
+    print(f"[INFO] ENDPOINT: {endpoint}")
+    print(f"[INFO] API_VERSION: {api_version}")
     return self._call_client(
         lambda model: AzureOpenAI(
             api_key=api_key, azure_endpoint=endpoint, api_version=api_version, model=model),
@@ -94,4 +95,5 @@ class API:
     print(f"[MOCK] Tokens Prompt: {total_tokens_prompt}")
     print(f"[MOCK] Tokens Resposta: {total_tokens_response}")
     print(f"[MOCK] Tempo: {response_time:.2f} segundos")
+
     return response_text, total_tokens_prompt, total_tokens_response, response_time

@@ -11,3 +11,4 @@ class PromptType(str, Enum):
   FEW_SHOT = 'FEW_SHOT'
   COT = 'COT'
   COT_FEW = 'COT_FEW'
+  CUSTOM = 'CUSTOM'

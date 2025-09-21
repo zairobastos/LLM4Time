@@ -13,7 +13,6 @@ from enum import Enum
 
 class TSFormat(str, Enum):
   ARRAY = 'ARRAY'
-  CUSTOM = 'CUSTOM'
   TSV = 'TSV'
   PLAIN = 'PLAIN'
   JSON = 'JSON'
@@ -21,6 +20,7 @@ class TSFormat(str, Enum):
   CONTEXT = 'CONTEXT'
   SYMBOL = 'SYMBOL'
   CSV = 'CSV'
+  CUSTOM = 'CUSTOM'
 
 
 PARSERS = {

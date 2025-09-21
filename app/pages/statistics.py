@@ -1,7 +1,9 @@
-import streamlit as st
-from components.statistics import Statistics as Component
-from utils.paths import abspath
 import os
+import streamlit as st
+from utils.paths import abspath
+
+# Componentes
+from components.statistics import Statistics as Component
 
 # LLM4Time
 from llm4time.core.data import loader

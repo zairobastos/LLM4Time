@@ -1,5 +1,5 @@
 """
-Módulo para preprocessamento de dados de séries temporais.
+Módulo para pré-processamento de dados de séries temporais.
 
 Este módulo fornece funcionalidades essenciais para preparação e estruturação
 de dados de séries temporais, incluindo seleção e padronização de colunas,

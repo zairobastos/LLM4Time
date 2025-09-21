@@ -6,6 +6,8 @@ from .prompts import PromptType
 from .prompts import ZERO_SHOT, FEW_SHOT, COT, COT_FEW
 from .formatting import TSFormat, TSType
 from .formatter import format
+from .data import Sampling
+from .data.sampling import frontend, backend, random, uniform
 
 
 def load_prompt(path: str, **kwargs) -> str:
@@ -48,25 +50,38 @@ def generate(
     periods: int,
     prompt_type: PromptType,
     ts_format: TSFormat,
-    ts_type: TSType
+    ts_type: TSType,
+    sampling: Sampling = Sampling.FRONTEND,
+    num_examples: int = 0,
+    template: str = None,
+    **kwargs
 ) -> str:
   """
   Gera um prompt de previsão de séries temporais de acordo com o tipo especificado.
 
   A função prepara os dados de treino no formato e tipo desejados, constrói exemplos
-  (quando necessário) e insere essas informações em diferentes templates de prompt
-  (ZERO-SHOT, FEW-SHOT, COT, COT-FEW).
+  de acordo com a estratégia de amostragem especificada e insere essas informações
+  em diferentes templates.
 
   Args:
       train (list[tuple]): Série temporal de treino no formato [(date, value), ...].
       periods (int): Número de períodos a serem previstos.
       prompt_type (PromptType): Tipo de prompt a ser gerado:
-          - ZERO_SHOT: sem exemplos.
-          - FEW_SHOT: com exemplos de previsões passadas.
-          - COT: com raciocínio passo a passo (Chain of Thought).
-          - COT_FEW: combinação de exemplos e raciocínio passo a passo.
+          - ZERO_SHOT: Sem exemplos.
+          - FEW_SHOT: Com exemplos de previsões passadas.
+          - COT: Com raciocínio passo a passo (Chain of Thought).
+          - COT_FEW: Combinação de exemplos e raciocínio passo a passo.
+          - CUSTOM: Se desejar utilizar um prompt customizado.
       ts_format (TSFormat): Formato de serialização da série temporal (ex.: CSV, JSON, Markdown).
       ts_type (TSType): Tipo de codificação dos valores (ex.: NUMERIC, TEXTUAL).
+      sampling (Sampling, opcional): Estratégia de amostragem dos dados de exemplo.
+                                     Padrão: Sampling.FRONTEND.
+      num_examples (int, opcional): Quantidade de exemplos a serem gerados.
+                                    Padrão: 0.
+      template (str, opcional): Prompt customizado se `prompt_type` for CUSTOM.
+                                    Padrão: None.
+      **kwargs: Se desejar inserir chaves adicionais ao prompt ou substituir
+                as chaves padrão.
 
   Returns:
       str: Prompt formatado pronto para ser usado em um modelo de linguagem.
@@ -74,7 +89,9 @@ def generate(
   Raises:
       ValueError:
           - Se `prompt_type` for inválido.
-          - Se `prompt_type` for FEW_SHOT ou COT_FEW e houver menos de 96 observações em `train`.
+          - Se `prompt_type` for CUSTOM e `template` for None.
+          - Se `num_examples` for maior que 0 e não houver períodos
+            suficientes para os exemplos solicitados.
 
   Examples:
       >>> generate(
@@ -85,52 +102,56 @@ def generate(
       ...     ts_type=TSType.NUMERIC
       ... )
   """
-  num_periods_train = len(train)
-  num_periods_forecast = periods
-  num_periods_example = periods
-  start_forecast_example = format(train[:4], ts_format, ts_type)
-  output_example = format(train[:24], ts_format, ts_type)
-  train_data = format(train, ts_format, ts_type)
+  if prompt_type == PromptType.CUSTOM and template is None:
+    raise ValueError(f"Para o tipo CUSTOM é obrigatório um template.")
+
+  n_periods_input = len(train)
+  n_periods_forecast = periods
+  n_periods_example = periods
 
   base_kwargs = {
-      "num_periods_train": num_periods_train,
-      "num_periods_forecast": num_periods_forecast,
-      "num_periods_example": num_periods_example,
-      "start_forecast_example": start_forecast_example,
-      "output_example": output_example,
-      "train_data": train_data,
-      "timestamp": "hora"
+      "input": format(train, ts_format, ts_type),
+      "input_example": format(train[:4], ts_format, ts_type),
+      "output_example": format(train[:n_periods_example], ts_format, ts_type),
+      "n_periods_input": n_periods_input,
+      "n_periods_forecast": n_periods_forecast,
+      "n_periods_example": n_periods_example
   }
+  base_kwargs.update(kwargs)
 
-  if prompt_type == PromptType.ZERO_SHOT:
-    return ZERO_SHOT.format(**base_kwargs)
+  min_required = n_periods_forecast * 2 * num_examples
+  if n_periods_input < min_required:
+    raise ValueError(
+        f"Para o número de exemplos solicitado é necessário pelo menos {min_required} períodos.")
 
-  elif prompt_type == PromptType.FEW_SHOT or prompt_type == PromptType.COT_FEW:
-    # Verificação se há dados suficientes
-    if num_periods_train < 96:
-      raise ValueError(
-          "Para FEW-SHOT ou COT-FEW deve conter pelo menos 96 elementos.")
+  sampling_map = {
+      Sampling.FRONTEND: frontend,
+      Sampling.BACKEND: backend,
+      Sampling.RANDOM: random,
+      Sampling.UNIFORM: uniform,
+  }
+  if sampling not in sampling_map:
+    raise ValueError(f"Estratégia de amostragem inválida: {sampling}")
+  samples = sampling_map[sampling](
+      train, window_size=n_periods_example, num_samples=num_examples)
 
-    window1 = format(train[:24], ts_format, ts_type)
-    window2 = format(train[24:48], ts_format, ts_type)
-    window3 = format(train[48:72], ts_format, ts_type)
-    window4 = format(train[72:96], ts_format, ts_type)
+  examples = [
+      f"Exemplo {i}:\n"
+      f"Período (histórico):\n{format(history, ts_format, ts_type)}\n"
+      f"Período (previsto):\n{format(forecast, ts_format, ts_type)}\n"
+      for i, (history, forecast) in enumerate(samples, 1)]
+  base_kwargs.update({"examples": "\n".join(examples)})
 
-    windows = {
-        "window1": window1,
-        "window2": window2,
-        "window3": window3,
-        "window4": window4,
-    }
-    base_kwargs.update(windows)
-
-    if prompt_type == PromptType.FEW_SHOT:
-      return FEW_SHOT.format(**base_kwargs)
-    else:
-      return COT_FEW.format(**base_kwargs)
-
-  elif prompt_type == PromptType.COT:
-    return COT.format(**base_kwargs)
-
-  else:
+  prompt_map = {
+      PromptType.ZERO_SHOT: ZERO_SHOT,
+      PromptType.FEW_SHOT: FEW_SHOT,
+      PromptType.COT_FEW: COT_FEW,
+      PromptType.COT: COT,
+      PromptType.CUSTOM: template,
+  }
+  if prompt_type not in prompt_map:
     raise ValueError(f"Tipo de prompt inválido: {prompt_type}")
+  try:
+    return prompt_map[prompt_type].format(**base_kwargs)
+  except KeyError as e:
+    raise ValueError(f"Chave {e} não definida.")
