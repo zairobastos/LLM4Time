@@ -12,13 +12,13 @@ import pandas as pd
 import numpy as np
 
 
-def plot_time_series(title: str, df: pd.DataFrame, **kwargs):
+def plot_time_series(title: str, ts: pd.DataFrame, **kwargs):
   """
   Cria um gráfico de linha para uma série temporal com datas.
 
   Args:
       title (str): Título do gráfico.
-      df (pd.DataFrame): DataFrame contendo colunas 'date' e 'value'
+      ts (pd.DataFrame): DataFrame contendo colunas 'date' e 'value'
                         com os dados da série temporal.
       **kwargs: Argumentos adicionais passados para fig.update_layout().
 
@@ -26,16 +26,16 @@ def plot_time_series(title: str, df: pd.DataFrame, **kwargs):
       go.Figure: Objeto Figure do Plotly com o gráfico da série temporal.
 
   Examples:
-      >>> df = pd.DataFrame({
+      >>> ts = pd.DataFrame({
       ...     'date': pd.date_range('2020-01-01', periods=100),
       ...     'value': np.random.randn(100).cumsum()
       ... })
-      >>> fig = plot_time_series("Vendas Mensais", df)
+      >>> fig = plot_time_series("Vendas Mensais", ts)
       >>> fig.show()
   """
   fig = go.Figure()
   fig.add_trace(go.Scatter(
-      x=df["date"], y=df["value"], mode="lines", name="Série Temporal"))
+      x=ts["date"], y=ts["value"], mode="lines", name="Série Temporal"))
   fig.update_layout(
       title=title,
       xaxis_title="Tempo",

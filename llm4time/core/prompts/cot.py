@@ -1,7 +1,7 @@
 COT = """
 Você é um assistente de previsão de séries temporais encarregado de analisar dados de uma série temporal específica.
 
-A série temporal tem dados de {n_periods_input} período(s) consecutivos. Cada anotação da série temporal representa a incidência de um evento que ocorre a cada dia.
+A série temporal tem dados de {n_periods_input} período(s) consecutivos. Cada anotação da série temporal representa a incidência de um evento que ocorre a cada {freq}.
 
 Início da Previsão:
 Sua previsão deve começar a partir do próximo período (meia-noite do próximo dia), seguindo o padrão observado nos dados anteriores.

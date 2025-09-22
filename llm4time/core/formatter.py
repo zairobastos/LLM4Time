@@ -7,12 +7,12 @@ from .formatting import FORMATTERS, PARSERS
 from .formatting import ENCODERS, DECODERS
 
 
-def format(ts: list, ts_format: TSFormat, ts_type: TSType) -> str:
+def format(data: list, ts_format: TSFormat, ts_type: TSType) -> str:
   """
   Formata uma série temporal de acordo com o tipo e o formato especificados.
 
   Args:
-      ts (list): Série temporal, como lista de valores ou tuplas (data, valor).
+      data (list): Série temporal, como lista de valores ou tuplas (data, valor).
       ts_format (TSFormat): Tipo de formatação desejada (ex.: CSV, JSON, Markdown, etc.).
       ts_type (TSType): Tipo de codificação dos valores (ex.: numeric, textual).
 
@@ -36,10 +36,10 @@ def format(ts: list, ts_format: TSFormat, ts_type: TSType) -> str:
     raise ValueError(f"Formato desconhecido: {ts_format}")
   if ts_type not in ENCODERS:
     raise ValueError(f"Tipo desconhecido: {ts_type}")
-  return FORMATTERS[ts_format](ENCODERS[ts_type](ts))
+  return FORMATTERS[ts_format](ENCODERS[ts_type](data))
 
 
-def parse(ts: str, ts_format: TSFormat, ts_type: TSType) -> list:
+def parse(data: str, ts_format: TSFormat, ts_type: TSType) -> list:
   """
   Converte uma string representando uma série temporal em uma lista de valores
   ou tuplas (date, value), de acordo com o formato e o tipo especificados.
@@ -73,7 +73,6 @@ def parse(ts: str, ts_format: TSFormat, ts_type: TSType) -> list:
   if ts_type not in DECODERS:
     raise ValueError(f"Tipo desconhecido: {ts_type}")
   try:
-    return (DECODERS[ts_type](PARSERS[ts_format](ts)) or
-            DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](ts)))
+    return DECODERS[ts_type](PARSERS[ts_format](data))
   except:
-    return DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](ts))
+    return DECODERS[TSType.NUMERIC](PARSERS[TSFormat.ARRAY](data))

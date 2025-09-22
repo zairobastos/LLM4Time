@@ -112,7 +112,7 @@ def generate(
   base_kwargs = {
       "input": format(train, ts_format, ts_type),
       "input_example": format(train[:4], ts_format, ts_type),
-      "output_example": format(train[:n_periods_example], ts_format, ts_type),
+      "output_example": format(train[:n_periods_example], TSFormat.ARRAY, TSType.NUMERIC),
       "n_periods_input": n_periods_input,
       "n_periods_forecast": n_periods_forecast,
       "n_periods_example": n_periods_example

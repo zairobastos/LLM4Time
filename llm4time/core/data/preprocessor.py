@@ -51,25 +51,25 @@ def standardize(
       1 2025-01-02     20
       2 2025-01-03     30
   """
-  df = df[[date_col, value_col]].copy()
+  ts = df[[date_col, value_col]].copy()
   # Renomeia as colunas para "date" e "value"
-  df.rename(columns={date_col: "date", value_col: "value"}, inplace=True)
+  ts.rename(columns={date_col: "date", value_col: "value"}, inplace=True)
   # Ordena pela coluna "date" em ordem crescente
-  df["date"] = pd.to_datetime(df["date"])
-  df = df.sort_values('date', ascending=True).reset_index(drop=True)
+  ts["date"] = pd.to_datetime(ts["date"])
+  ts = ts.sort_values('date', ascending=True).reset_index(drop=True)
 
   if duplicates == "first":
-    df = df.drop_duplicates(subset=["date"], keep="first")
+    ts = ts.drop_duplicates(subset=["date"], keep="first")
   elif duplicates == "last":
-    df = df.drop_duplicates(subset=["date"], keep="last")
+    ts = ts.drop_duplicates(subset=["date"], keep="last")
   elif duplicates == "sum":
-    df = df.groupby("date", as_index=False)["value"].sum()
+    ts = ts.groupby("date", as_index=False)["value"].sum()
 
-  return df
+  return ts
 
 
 def normalize(
-    df: pd.DataFrame,
+    ts: pd.DataFrame,
     freq: str,
     start: str = None,
     end: str = None
@@ -82,7 +82,7 @@ def normalize(
   Datas ausentes são preenchidas com NaN.
 
   Args:
-      df (pd.DataFrame): DataFrame contendo obrigatoriamente a coluna 'date'.
+      ts (pd.DataFrame): DataFrame contendo obrigatoriamente a coluna 'date'.
       freq (str): Frequência da série temporal (ex.: 'D' = diário, 'M' = mensal, 'H' = horário).
       start (str, optional): Data inicial do intervalo (ex.: "2020-01" ou "2020-01-01").
                             Se None, usa data mínima em `df["date"]`.
@@ -95,8 +95,8 @@ def normalize(
       pd.DataFrame: DataFrame expandido para conter todas as datas no intervalo definido, com valores ausentes preenchidos como NaN.
 
   Examples:
-      >>> df = pd.DataFrame({"date": pd.to_datetime(["2021-01-01", "2021-01-03"]), "value": [10, 30]})
-      >>> normalize(df, freq="D", start="2021-01-01", end="2021-01-05")
+      >>> ts = pd.DataFrame({"date": pd.to_datetime(["2021-01-01", "2021-01-03"]), "value": [10, 30]})
+      >>> normalize(ts, freq="D", start="2021-01-01", end="2021-01-05")
               date  value
       0 2021-01-01   10.0
       1 2021-01-02    NaN
@@ -104,16 +104,16 @@ def normalize(
       3 2021-01-04    NaN
       4 2021-01-05    NaN
   """
-  start_date = pd.to_datetime(start) if start else df["date"].min()
-  end_date = pd.to_datetime(end) if end else df["date"].max()
+  start_date = pd.to_datetime(start) if start else ts["date"].min()
+  end_date = pd.to_datetime(end) if end else ts["date"].max()
 
-  df_range = pd.date_range(start=start_date, end=end_date, freq=freq)
-  df_range = pd.DataFrame({"date": df_range})
-  df = pd.merge(df_range, df, on="date", how="left")
-  return df
+  ts_range = pd.date_range(start=start_date, end=end_date, freq=freq)
+  ts_range = pd.DataFrame({"date": ts_range})
+  ts = pd.merge(ts_range, ts, on="date", how="left")
+  return ts
 
 
-def split(df: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tuple[list[tuple[str, float]], list[float]]:
+def split(ts: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tuple[list[tuple[str, float]], list[float]]:
   """
   Divide uma série temporal em conjunto de treino e validação com base em datas de corte.
 
@@ -121,7 +121,7 @@ def split(df: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tup
   enquanto o conjunto de validação contém as observações após `end_date`, limitado a `periods` valores.
 
   Args:
-      df (pd.DataFrame): DataFrame com colunas obrigatórias 'date' e 'value'.
+      ts (pd.DataFrame): DataFrame com colunas obrigatórias 'date' e 'value'.
       start_date (str): Data inicial do período de treino (formato "YYYY-MM-DD").
       end_date (str): Data final do período de treino (formato "YYYY-MM-DD").
       periods (int): Quantidade de valores a considerar no conjunto de validação.
@@ -132,17 +132,17 @@ def split(df: pd.DataFrame, start_date: str, end_date: str, periods: int) -> tup
           - y_val: Lista de valores (float) do conjunto de validação, limitado a `periods`
 
   Examples:
-      >>> df = pd.DataFrame({
+      >>> ts = pd.DataFrame({
       ...     "date": ["2025-01-01", "2025-01-02", "2025-01-03", "2025-01-04"],
       ...     "value": [10.123, 20.456, 30.789, 40.321]
       ... })
-      >>> split(df, start_date="2025-01-01", end_date="2025-01-02", periods=2)
+      >>> split(ts, start_date="2025-01-01", end_date="2025-01-02", periods=2)
       ([('2025-01-01', 10.123), ('2025-01-02', 20.456)], [30.789, 40.321])
   """
-  df_train = df.query("date >= @start_date and date <= @end_date")
-  df_val = df.query("date > @end_date")
+  ts_train = ts.query("date >= @start_date and date <= @end_date")
+  ts_val = ts.query("date > @end_date")
 
-  train = list(zip(df_train['date'].astype(str), df_train['value'].round(3)))
-  y_val = df_val['value'].round(3).tolist()
+  train = list(zip(ts_train['date'].astype(str), ts_train['value'].round(3)))
+  y_val = ts_val['value'].round(3).tolist()
 
   return train, y_val[:periods]
