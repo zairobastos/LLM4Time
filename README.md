@@ -1,7 +1,8 @@
 <div align="center">
+<img src="https://github.com/zairobastos/LLM4Time/blob/main/docs/assets/LLM4Time.svg" width="150" />
 
-# 📊  LLM4Time
-Uma biblioteca para previsão de séries temporais com modelos de linguagem
+# LLM4Time
+**Uma biblioteca para previsão de séries temporais com modelos de linguagem**
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1TcQ9RPNrtPHSq5gaMXfBTEV7uEpMA66w?usp=sharing)
 [![PyPI version](https://img.shields.io/pypi/v/llm4time.svg)](https://pypi.org/project/llm4time/)
@@ -43,13 +44,13 @@ cd LLM4Time
 ```
 #### 2. Crie e ative um ambiente virtual (Opcional)
 ```bash
-python -m venv venv
-source venv/bin/activate      # Bash/Zsh
-source venv/bin/activate.fish # Fish Shell
+python -m venv .venv
+source .venv/bin/activate      # Bash/Zsh
+source .venv/bin/activate.fish # Fish Shell
 ```
 #### 3. Instale as dependências
 ```bash
-python -m pip install --upgrade pip
+pip install -e .
 pip install -r requirements.txt -r requirements-streamlit.txt
 ```
 #### 4. Execute a aplicação
@@ -243,7 +244,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <a href="https://www.linkedin.com/in/fernanda-scarcela-a95543220/" title="LinkedIn">🔗</a>
     </td>
     <td align="center" nowrap>
-      <a href="https://lattes.cnpq.br/4380023778677961"><img src="https://scholar.googleusercontent.com/citations?view_op=view_photo&user=dxEWdrAAAAAJ" style="width: 80px; height: 80px;" alt="Carlos Caminha"/></a>
+      <a href="https://lattes.cnpq.br/4380023778677961"><img src="https://github.com/zairobastos/LLM4Time/blob/main/docs/assets/carlos.png" style="width: 80px; height: 80px;" alt="Carlos Caminha"/></a>
       <br />
       <sub><b>Carlos Caminha</b></sub>
       <br />
@@ -253,7 +254,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <a href="https://lattes.cnpq.br/4380023778677961" title="Lattes">🔗</a>
     </td>
     <td align="center" nowrap>
-      <a href="https://lattes.cnpq.br/5168415467086883"><img src="https://scholar.googleusercontent.com/citations?view_op=view_photo&user=3ivVWKkAAAAJ" style="width: 80px; height: 80px;" alt="José Wellington Franco"/></a>
+      <a href="https://lattes.cnpq.br/5168415467086883"><img src="https://github.com/zairobastos/LLM4Time/blob/main/docs/assets/wellington.png" style="width: 80px; height: 80px;" alt="José Wellington Franco"/></a>
       <br />
       <sub><b>José Wellington Franco</b></sub>
       <br />
