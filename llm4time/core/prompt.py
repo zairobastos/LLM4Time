@@ -8,6 +8,8 @@ from .formatting import TSFormat, TSType
 from .formatter import format
 from .data import Sampling
 from .data.sampling import frontend, backend, random, uniform
+from .evaluate.statistics import Statistics
+import pandas as pd
 
 
 def load_prompt(path: str, **kwargs) -> str:
@@ -51,7 +53,7 @@ def generate(
     prompt_type: PromptType,
     ts_format: TSFormat,
     ts_type: TSType,
-    sampling: Sampling = Sampling.FRONTEND,
+    sampling: Sampling = None,
     num_examples: int = 0,
     template: str = None,
     **kwargs
@@ -109,13 +111,26 @@ def generate(
   n_periods_forecast = periods
   n_periods_example = periods
 
+  df = pd.DataFrame(train, columns=['date', 'value'])
+  stats = Statistics(df['value'])
+  stl = stats.trend_seasonality(df)
+
   base_kwargs = {
       "input": format(train, ts_format, ts_type),
       "input_example": format(train[:4], ts_format, ts_type),
-      "output_example": format(train[:n_periods_example], TSFormat.ARRAY, TSType.NUMERIC),
+      "output_example": format(train[:n_periods_example], ts_format, ts_type),
       "n_periods_input": n_periods_input,
       "n_periods_forecast": n_periods_forecast,
-      "n_periods_example": n_periods_example
+      "n_periods_example": n_periods_example,
+      "mean": stats.mean,
+      "median": stats.median,
+      "std": stats.std,
+      "min": stats.min,
+      "max": stats.max,
+      "first_quartile": stats.first_quartile,
+      "third_quartile": stats.third_quartile,
+      "trend_strength": stl[3],
+      "seasonality_strength":  stl[4],
   }
   base_kwargs.update(kwargs)
 
@@ -124,23 +139,23 @@ def generate(
     raise ValueError(
         f"Para o número de exemplos solicitado é necessário pelo menos {min_required} períodos.")
 
-  sampling_map = {
-      Sampling.FRONTEND: frontend,
-      Sampling.BACKEND: backend,
-      Sampling.RANDOM: random,
-      Sampling.UNIFORM: uniform,
-  }
-  if sampling not in sampling_map:
-    raise ValueError(f"Estratégia de amostragem inválida: {sampling}")
-  samples = sampling_map[sampling](
-      train, window_size=n_periods_example, num_samples=num_examples)
-
-  examples = [
-      f"Exemplo {i}:\n"
-      f"Período (histórico):\n{format(history, ts_format, ts_type)}\n"
-      f"Período (previsto):\n{format(forecast, ts_format, ts_type)}\n"
-      for i, (history, forecast) in enumerate(samples, 1)]
-  base_kwargs.update({"examples": "\n".join(examples)})
+  if sampling is not None:
+    sampling_map = {
+        Sampling.FRONTEND: frontend,
+        Sampling.BACKEND: backend,
+        Sampling.RANDOM: random,
+        Sampling.UNIFORM: uniform,
+    }
+    if sampling not in sampling_map:
+      raise ValueError(f"Estratégia de amostragem inválida: {sampling}")
+    samples = sampling_map[sampling](
+        train, window_size=n_periods_example, num_samples=num_examples)
+    examples = [
+        f"Exemplo {i}:\n"
+        f"Entrada (histórico):\n{format(history, ts_format, ts_type)}\n"
+        f"Saída (previsto):\n<out>\n{format(forecast, ts_format, ts_type)}\n</out>\n"
+        for i, (history, forecast) in enumerate(samples, 1)]
+    base_kwargs.update({"examples": "\n".join(examples)})
 
   prompt_map = {
       PromptType.ZERO_SHOT: ZERO_SHOT,

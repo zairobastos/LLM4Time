@@ -402,7 +402,7 @@ st.write("### Meus Prompts")
 if prompts:
   df_prompts = st.data_editor(
       pd.DataFrame([
-          {"Nome": f"📄 {p["name"]}", "Excluir": False}
+          {"Nome": f"📄 {p['name']}", "Excluir": False}
           for p in prompts]),
       hide_index=True,
       use_container_width=True)

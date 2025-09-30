@@ -1,36 +1,35 @@
 ZERO_SHOT = """
-Você é um modelo especializado em previsão de séries temporais. Seu papel é prever os próximos valores com base em padrões históricos, independentemente do domínio dos dados.
-
-A série temporal tem dados de {n_periods_input} período(s) consecutivos. Cada anotação da série temporal representa a incidência de um evento que ocorre a cada {freq}.
-
-Início da Previsão:
-A previsão deve iniciar imediatamente após o último ponto da série, seguindo o padrão histórico detectado nos dados anteriores.
-Para este exemplo, um início de previsão esperado pode ser:
-{input_example}
-Garanta que o primeiro valor da previsão corresponda ao início do período, respeitando os padrões observados.
+Você é um especialista em modelagem estatística e aprendizado de máquina com foco em previsão de séries temporais.
 
 Objetivo:
-Seu objetivo é prever os próximos {n_periods_forecast} valores da série temporal, levando em consideração os padrões históricos, tendências e quaisquer efeitos sazonais ou contextuais detectáveis nos dados.
+Prever os próximos {n_periods_forecast} valores com base na série histórica ({n_periods_input} períodos).
 
-Regras da Saída:
-Após analisar os dados fornecidos e compreender os padrões, gere uma previsão para os próximos {n_periods_forecast} períodos, com as seguintes regras:
-A saída deve ser exclusivamente um array numérico (lista com {n_periods_forecast} valores);
-Em hipótese alguma gere um código;
-Em hipótese alguma gere uma explicação do que você fez;
-Forneça apenas e exclusivamente um array contendo a quantidade de números solicitados.
-A previsão deve começar com o valor correspondente ao início do próximo período, respeitando os padrões observados nos dados históricos.
+Contexto Estatístico (para guiar a previsão):
+- Média: {mean}
+- Mediana: {median}
+- Desvio Padrão: {std}
+- Valor Mínimo: {min}
+- Valor Máximo: {max}
+- Primeiro Quartil (Q1): {first_quartile}
+- Terceiro Quartil (Q3): {third_quartile}
+- Força da Tendência (STL): {trend_strength}
+- Força da Sazonalidade (STL): {seasonality_strength}
 
-Exemplo de Saída para N={n_periods_example}:
+Regras:
+1. A previsão deve iniciar imediatamente após o último ponto observado.
+2. Produza apenas os valores previstos, sem texto, comentários ou código.
+3. Delimite a saída exclusivamente com <out></out>.
+
+Etapas:
+1. Analise a série passo a passo (em seu raciocínio interno, não inclua na saída final).
+2. Gere a previsão para os próximos {n_periods_forecast} períodos.
+3. Formate a saída exatamente como no exemplo, com os valores dentro de <out>.
+
+Exemplo:
+<out>
 {output_example}
+</out>
 
-Instruções Adicionais:
-Padrões Temporais: Utilize os dados fornecidos para identificar padrões sazonais ou recorrências que se repetem ao longo do tempo, como tendências ou ciclos característicos da série.
-Eventos Especiais: A ocorrência de eventos pode ser significativamente afetada por fatores contextuais relevantes, como feriados, promoções, mudanças políticas, condições climáticas, entre outros.
-Periodicidade e Contexto Temporal: Considere o impacto de variações regulares baseadas em unidades de tempo recorrentes ({freq}), conforme apropriado ao domínio da série.
-Duração de um Evento: A série temporal fornecida representa a ocorrência de um evento a cada {freq}.
-
-Série temporal a ser analisada:
+Dados da Série para previsão:
 {input}
-
-Gere um array com {n_periods_forecast} observações (N={n_periods_forecast}) prevendo os números da sequência:
 """

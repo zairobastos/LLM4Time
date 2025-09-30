@@ -75,7 +75,6 @@ with st.sidebar:
         label='Exemplos', min_value=1, max_value=5, value=1,
         help='Número de exemplos a ser utilizado.')
         if prompt_type in (PromptType.FEW_SHOT, PromptType.COT_FEW) else 0)
-
     examples = (st.slider(
         label='Exemplos', min_value=0, max_value=5, value=0,
         help='Número de exemplos a ser utilizado.')
@@ -84,7 +83,7 @@ with st.sidebar:
     sampling = (st.selectbox(
         label='Amostragem', options=list(Sampling), index=0, format_func=lambda f: f.name,
         help='Escolha a estratégia de amostragem a ser utilizada.')
-        if examples > 0 else Sampling.FRONTEND)
+        if examples > 0 else None)
 
     ts_format = st.selectbox(
         label='Formato', options=list(TSFormat), index=0, format_func=lambda f: f.name,
