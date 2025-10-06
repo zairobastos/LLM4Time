@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/zairobastos/LLM4Time/main/docs/assets/LLM4Time.svg" width="150" />
 
 # LLM4Time
-**Uma biblioteca para previsão de séries temporais com modelos de linguagem**
+**A library for time series forecasting using Large Language Models (LLMs)**
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1TcQ9RPNrtPHSq5gaMXfBTEV7uEpMA66w?usp=sharing)
 [![PyPI version](https://img.shields.io/pypi/v/llm4time.svg)](https://pypi.org/project/llm4time/)
@@ -13,165 +13,165 @@
 
 <p align="center">
   <a href="#-get-started">Get Started</a> •
-  <a href="https://zairobastos.github.io/LLM4Time/">Documentação</a> •
-  <a href="#-referências">Referências</a> •
-  <a href="#-contato">Contato</a>
+  <a href="https://zairobastos.github.io/LLM4Time/">Documentation</a> •
+  <a href="#-referências">References</a> •
+  <a href="#-contato">Contact</a>
 </p>
 
 ## 🧩 Get Started
-**LLM4Time** é uma biblioteca Python para previsão de séries temporais com **modelos de linguagem (LLMs)**.
-Ela fornece uma arquitetura modular que abrange:
-- [Pré-processamento e tratamento de dados](#pré-processamento-e-tratamento-de-dados)
-- [Geração de prompts](#geração-de-prompts)
-- [Previsão com LLMs](#previsão-com-llms)
-- [Avaliação de métricas](#avaliação-de-métricas)
-- [Visualização interativa](#visualização-interativa)
+LLM4Time is a Python library for time series forecasting using Large Language Models (LLMs).
+It provides a modular architecture that includes:
+- [Data preprocessing and handling](#pré-processamento-e-tratamento-de-dados)
+- [Prompt generation](#geração-de-prompts)
+- [Forecasting with LLMs](#previsão-com-llms)
+- [Metric evaluation](#avaliação-de-métricas)
+- [Interactive visualization](#visualização-interativa)
 
-### Instalação
+### Installation
 ```bash
 pip install llm4time
 ```
 
-### Rodando a interface Streamlit
-Além disso, disponibilizamos uma interface via Streamlit, proporcionando uma interação mais intuitiva e prática com a biblioteca.
+### Running the Streamlit interface
+In addition, we provide a Streamlit-based interface, offering a more intuitive and practical way to interact with the library.
 
-Siga os passos abaixo para clonar o repositório, configurar o ambiente e executar a aplicação.
+Follow the steps below to clone the repository, set up the environment, and run the application.
 
-#### 1. Clone o repositório
+#### 1. Clone the repository
 ```bash
 git clone https://github.com/zairobastos/LLM4Time.git
 cd LLM4Time
 ```
-#### 2. Crie e ative um ambiente virtual (Opcional)
+#### 2. Create and activate a virtual environment (Optional)
 ```bash
 python -m venv .venv
 source .venv/bin/activate      # Bash/Zsh
 source .venv/bin/activate.fish # Fish Shell
 ```
-#### 3. Instale as dependências
+#### 3. Install the dependencies
 ```bash
 pip install -e .
 pip install -r requirements.txt -r requirements-streamlit.txt
 ```
-#### 4. Execute a aplicação
-Usando python 🐍
+#### 4. Run the application
+Using python 🐍
 ```bash
 python app/main.py
 ```
-> Acesse a aplicação em `http://localhost:8501`
+> Access the application at `http://localhost:8501`
 
-Ou usando docker 🐋
+Or using docker 🐋
 ```bash
 docker compose up
 ```
 
-### Pré-processamento e tratamento de dados
-#### 1. Carregamento dos dados
+### Data preprocessing and handling
+#### 1. Data loading
 ```python
 from llm4time.core.data import loader
 from llm4time.core.evaluate import Statistics
 
-# Carrega os dados CSV, XLSX, JSON ou Parquet
+# Data loading using CSV, XLSX, JSON or Parquet
 df = loader.load_data("etth2.csv")
 
-# Estatísticas descritivas
+# Descriptive statistics
 stats = Statistics(df['OT'])
-print(f"Média: {stats.mean}")
-print(f"Mediana: {stats.median}")
-print(f"1° Quartil: {stats.first_quartile}")
-print(f"3° Quartil: {stats.third_quartile}")
-print(f"Desvio padrão: {stats.std}")
-print(f"Mínimo: {stats.min}")
-print(f"Máximo: {stats.max}")
-print(f"Quantidade de dados ausentes: {stats.missing_count}")
-print(f"Percentual de dados ausentes: {stats.missing_percentage}")
+print(f"Mean: {stats.mean}")
+print(f"Median: {stats.median}")
+print(f"1° Quartile: {stats.first_quartile}")
+print(f"3° Quartile: {stats.third_quartile}")
+print(f"Standard Deviation: {stats.std}")
+print(f"Minimum: {stats.min}")
+print(f"Maximum: {stats.max}")
+print(f"Number of missing values: {stats.missing_count}")
+print(f"Percentage of missing values: {stats.missing_percentage}")
 ```
-#### 2. Pré-processamento
+#### 2. Data preprocessing
 ```python
 from llm4time.core.data import preprocessor
 
-# Padroniza para o formato de série temporal
+# Standardize into time series format
 df = preprocessor.standardize(
   df,
-  date_col='date',    # Nome da coluna que contém as datas/timestamps
-  value_col='OT',     # Nome da coluna que contém os valores da série temporal
-  duplicates='first'  # Como tratar linhas duplicadas: 'first' mantém a primeira ocorrência
+  date_col='date',    # Column containing dates/timestamps
+  value_col='OT',     # Column containing time series values
+  duplicates='first'  # How to handle duplicate rows: 'first' keeps the first occurrence
 )
 
-# Garante que todas as datas/horas estejam presentes.
+# Ensure all timestamps are present
 df = preprocessor.normalize(df, freq='h')
 ```
 
-#### 3. Imputação de dados ausentes
+#### 3. Missing data imputation
 ```python
 from llm4time.core.data import imputation
 
-# Substitui os valores ausentes pela média da coluna 'value'.
+# Replace missing values with the column mean
 df = imputation.mean(df)
 ```
 
-#### 4. Divisão dos dados
+#### 4. Data split
 ```python
 from llm4time.core.data import preprocessor
 
-# Divide o conjunto de dados em treinamento e validação
+# Split the dataset into training and validation sets
 train, y_val = preprocessor.split(
   df,
-  start_date='2016-06-01 00:00:00', # Início do conjunto de treinamento
-  end_date='2016-12-01 00:00:00',   # Fim do conjunto de treinamento
-  periods=24                        # Número de períodos para previsão
+  start_date='2016-06-01 00:00:00', # Start of the training set
+  end_date='2016-12-01 00:00:00',   # End of the training set
+  periods=24                        # Number of periods to forecast
 )
 ```
-### Geração de prompts
-#### 5. Gerando prompt zero-shot
+### Prompt generation
+#### 5. Zero-shot prompt generation
 ```python
 from llm4time.core import prompt
 from llm4time.core import PromptType, TSFormat, TSType
 
 content = prompt.generate(
-    train,       # Conjunto de treino [(date, value), ...]
-    periods=24,  # Número de períodos que queremos prever
-    prompt_type=PromptType.ZERO_SHOT,  # Tipo de prompt: ZERO_SHOT (sem exemplos)
-    ts_format=TSFormat.ARRAY,          # Formato da série temporal
-    ts_type=TSType.NUMERIC             # Tipo de codificação dos valores da série
+    train,       # Training set [(date, value), ...]
+    periods=24,  # Number of periods to forecast
+    prompt_type=PromptType.ZERO_SHOT,  # prompt type: ZERO_SHOT (no examples)
+    ts_format=TSFormat.ARRAY,          # time series format
+    ts_type=TSType.NUMERIC             # Type of encoding for series values
 )
 ```
 
-### Previsão com LLMs
-#### 6. Instanciando um modelo OpenAI
+### Forecasting with LLMs
+#### 6. Initializing an OpenAI model
 ```python
 from llm4time.core.models import OpenAI
 
 model = OpenAI(
-  model='gpt-4o',  # Nome do modelo OpenAI a ser utilizado.
-  api_key='...',   # Chave de API para autenticação no serviço OpenAI.
-  base_url='..'    # URL base do endpoint OpenAI.
+  model='gpt-4o',  # OpenAI model to be used.
+  api_key='...',   # API key for authentication with the OpenAI service.
+  base_url='..'    # Base URL of the OpenAI endpoint.
 )
 ```
 
-#### 7. Gerando uma previsão
+#### 7. Predicting values
 ```python
-# Gera a previsão
+# Forecasting
 response, prompt_tokens, response_tokens, time_sec = model.predict(
-    content,          # Prompt previamente gerado
-    temperature=0.7,  # Grau de aleatoriedade da resposta
-    max_tokens=1000   # Número máximo de tokens na resposta
+    content,          # Previously generated prompt
+    temperature=0.7,  # Level of randomness in the response
+    max_tokens=1000   # Maximum number of tokens in the response
 )
 
-print("Resposta do modelo:", response)
-print("Número de tokens do prompt:", prompt_tokens)
-print("Número de tokens da resposta:", response_tokens)
-print("Tempo de execução (s):", time_sec)
+print("Model response:", response)
+print("Prompt tokens:", prompt_tokens)
+print("Response tokens:", response_tokens)
+print("Execution time (s):", time_sec)
 ```
 
-### Avaliação de métricas
-#### 8. Métricas de erro
+### Metric evaluation
+#### 8. Error metrics
 
 ```python
 from llm4time.core import formatter
 from llm4time.core.evaluate.metrics import Metrics
 
-# Converte a string da resposta em uma lista numérica.
+# Converts the response string into a numerical list
 y_pred = formatter.parse(
   response,
   ts_format=TSFormat.ARRAY,
@@ -180,26 +180,26 @@ y_pred = formatter.parse(
 
 metrics = Metrics(y_val, y_pred)
 
-# Métricas de erro
-print(f"sMAPE: {metrics.smape}") # Erro percentual simétrico médio
-print(f"MAE: {metrics.mae}")     # Erro absoluto médio
-print(f"RMSE: {metrics.rmse}")   # Raiz do erro quadrático médio
+# Error metrics
+print(f"sMAPE: {metrics.smape}") # Symmetric Mean Absolute Percentage Error
+print(f"MAE: {metrics.mae}")     # Mean Absolute Error
+print(f"RMSE: {metrics.rmse}")   # Root Mean Squared Error
 ```
 
-### Visualização interativa
-#### 9. Gráficos comparativos entre valores reais e previstos
+### Interactive evaluation
+#### 9. Plots comparing actual and predicted values
 ```python
 from llm4time.visualization import plots
 
-# Gera um gráfico comparativo entre valores reais e previstos.
-plots.plot_forecast("Comparação entre valores reais e previstos", y_val, y_pred)
+# Generate a comparison plot between actual and predicted values
+plots.plot_forecast("Comparison between actual and predicted values", y_val, y_pred)
 
-# Gera um gráfico de barras comparando estatísticas descritivas.
-plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
+# Generate a bar chart comparing descriptive statistics
+plots.plot_forecast_statistics("Statistical comparison", y_val, y_pred)
 ```
 ---
 
-## 🔍 Referências
+## 🔍 References
 ```latex
 @article{zairo2025prompt,
   title={Prompt-Driven Time Series Forecasting with Large Language Models},
@@ -209,7 +209,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
 }
 ```
 
-## 👥 Equipe
+## 👥 Team
 <div align="center">
 <table>
   <tr>
@@ -218,7 +218,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <br />
       <sub><b>Zairo Bastos</b></sub>
       <br />
-      <sub><i>Mestrando - UFC</i></sub>
+      <sub><i>Master’s student - UFC</i></sub>
       <br />
       <a href="mailto:zairobastos@gmail.com" title="Email">📧</a>
       <a href="https://www.linkedin.com/in/zairobastos/" title="LinkedIn">🔗</a>
@@ -228,7 +228,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <br />
       <sub><b>Wesley Barbosa</b></sub>
       <br />
-      <sub><i>Graduando - UFC</i></sub>
+      <sub><i>Undergraduate student - UFC</i></sub>
       <br />
       <a href="mailto:wesley.barbosa.developer@gmail.com" title="Email">📧</a>
       <a href="https://www.linkedin.com/in/wesleybarbosasilva/" title="LinkedIn">🔗</a>
@@ -238,7 +238,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <br />
       <sub><b>Fernanda Scarcela</b></sub>
       <br />
-      <sub><i>Graduanda - UFC</i></sub>
+      <sub><i>Undergraduate student - UFC</i></sub>
       <br />
       <a href="mailto:fernandascla@alu.ufc.br" title="Email">📧</a>
       <a href="https://www.linkedin.com/in/fernanda-scarcela-a95543220/" title="LinkedIn">🔗</a>
@@ -248,7 +248,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <br />
       <sub><b>Carlos Caminha</b></sub>
       <br />
-      <sub><i>Professor Orientador - UFC</i></sub>
+      <sub><i>Academic advisor - UFC</i></sub>
       <br />
       <a href="mailto:caminha@ufc.br" title="Email">📧</a>
       <a href="https://lattes.cnpq.br/4380023778677961" title="Lattes">🔗</a>
@@ -258,7 +258,7 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
       <br />
       <sub><b>José Wellington Franco</b></sub>
       <br />
-      <sub><i>Professor Orientador - UFC</i></sub>
+      <sub><i>Academic advisor - UFC</i></sub>
       <br />
       <a href="mailto:wellington@crateus.ufc.br" title="Email">📧</a>
       <a href="https://lattes.cnpq.br/5168415467086883" title="Lattes">🔗</a>
@@ -267,10 +267,10 @@ plots.plot_forecast_statistics("Comparação estatística", y_val, y_pred)
 </table>
 </div>
 
-## 📄 Licença
-Este projeto está licenciado sob a [MIT License](https://github.com/zairobastos/LLM4Time/blob/main/LICENSE).
+## 📄 License
+This project is licensed under the [MIT License](https://github.com/zairobastos/LLM4Time/blob/main/LICENSE).
 
-## 📬 Contato
-Em caso de dúvidas, sugestões ou feedback:
+## 📬 Contact
+For questions, suggestions, or feedback:
 - 📧 Email: [zairobastos@gmail.com](mailto:zairobastos@gmail.com)
 - 🔗 LinkedIn: [Zairo Bastos](https://www.linkedin.com/in/zairobastos/)
