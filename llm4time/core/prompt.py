@@ -151,11 +151,13 @@ def generate(
     samples = sampling_map[sampling](
         train, window_size=n_periods_example, num_samples=num_examples)
     examples = [
-        f"Exemplo {i}:\n"
-        f"Entrada (histórico):\n{format(history, ts_format, ts_type)}\n"
-        f"Saída (previsto):\n<out>\n{format(forecast, ts_format, ts_type)}\n</out>\n"
+        f"Example {i}:\n"
+        f"Input (history):\n{format(history, ts_format, ts_type)}\n"
+        f"Output (forecast):\n<out>\n{format(forecast, ts_format, ts_type)}\n</out>\n"
         for i, (history, forecast) in enumerate(samples, 1)]
-    base_kwargs.update({"examples": "\n".join(examples)})
+
+    if "examples" not in kwargs:
+      base_kwargs.update({"examples": "\n".join(examples)})
 
   prompt_map = {
       PromptType.ZERO_SHOT: ZERO_SHOT,

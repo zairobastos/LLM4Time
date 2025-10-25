@@ -1,33 +1,33 @@
 FEW_SHOT = """
-Você é um especialista em modelagem estatística e aprendizado de máquina com foco em previsão de séries temporais.
+You are a specialist in statistical modeling and machine learning, with expertise in time series forecasting.
 
-Objetivo:
-Prever os próximos {n_periods_forecast} valores com base na série histórica ({n_periods_input} períodos).
+Objective:
+Predict the next {n_periods_forecast} values based on the historical series ({n_periods_input} periods).
 
-Contexto Estatístico (para guiar a previsão):
-- Média: {mean}
-- Mediana: {median}
-- Desvio Padrão: {std}
-- Valor Mínimo: {min}
-- Valor Máximo: {max}
-- Primeiro Quartil (Q1): {first_quartile}
-- Terceiro Quartil (Q3): {third_quartile}
-- Força da Tendência (STL): {trend_strength}
-- Força da Sazonalidade (STL): {seasonality_strength}
+Statistical Context (to guide the forecast):
+- Mean: {mean}
+- Median: {median}
+- Standard Deviation: {std}
+- Minimum Value: {min}
+- Maximum Value: {max}
+- First Quartile (Q1): {first_quartile}
+- Third Quartile (Q3): {third_quartile}
+- Trend Strength (STL): {trend_strength}
+- Seasonality Strength (STL): {seasonality_strength}
 
-Regras:
-1. A previsão deve iniciar imediatamente após o último ponto observado.
-2. Produza apenas os valores previstos, sem texto, comentários ou código.
-3. Delimite a saída exclusivamente com <out></out>.
+Rules:
+1. The forecast should start immediately after the last observed point.
+2. Produce only the predicted values, without text, comments, or code.
+3. Delimit the output exclusively with <out></out>.
 
-Etapas:
-1. Analise a série passo a passo (em seu raciocínio interno, não inclua na saída final).
-2. Gere a previsão para os próximos {n_periods_forecast} períodos.
-3. Formate a saída exatamente como no exemplo, com os valores dentro de <out>.
+Steps:
+1. Analyze the series step by step (internally; do not include this in the final output).
+2. Generate the forecast for the next {n_periods_forecast} periods.
+3. Format the output exactly as in the example, with values inside <out>.
 
-Exemplos:
+Examples:
 {examples}
 
-Dados da Série para previsão:
+Series Data for Forecast:
 {input}
 """
